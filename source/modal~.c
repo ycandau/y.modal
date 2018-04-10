@@ -29,7 +29,7 @@ void modal_bang(t_modal *x)
 
 int C74_EXPORT main(void)
 {
-	t_class *c = class_new("modal~", (method)modal_new, (method)modal_free, (long)sizeof(t_modal), 0L, A_GIMME, 0);
+	t_class *c = class_new("y.modal~", (method)modal_new, (method)modal_free, (long)sizeof(t_modal), 0L, A_GIMME, 0);
 
 	class_addmethod(c, (method)modal_bang, "bang", 0);
 
