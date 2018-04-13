@@ -11,9 +11,9 @@
 /**
 Function pointer types used for saving/loading a specific structure to/from a dictionary
   void *:  A pointer to the structure to save
-	t_dictionary *:  A pointer to the dictionary holding the array of structures
-	t_symbol *:  The name under which to save the structure
-	t_symbol *:  A symbol to indicate the write protection status: "true" or "false"
+  t_dictionary *:  A pointer to the dictionary holding the array of structures
+  t_symbol *:  The name under which to save the structure
+  t_symbol *:  A symbol to indicate the write protection status: "true" or "false"
 */
 typedef t_my_err (*t_dict_save) (void *, t_dictionary *, t_symbol *, t_symbol *);
 typedef t_my_err (*t_dict_load) (t_dictionary *, void *);
@@ -50,7 +50,7 @@ t_dict_save dict_save_func:  Specific function used to save a structure into a s
 Example:  dict_save_protect((t_object *)x, x->dict_sym, gensym("states"), gensym("state save"), 1, state, argv + 2, argv + 3, _state_dict_save);
 */
 t_my_err dict_save_protect(void *x, t_symbol *dict_root_sym, t_symbol *dict_sub_sym, t_symbol *cmd_sym, t_int32 offset,
-	void *struct_ptr, t_atom *argv_dict_sub_sub, t_atom *argv_prot, t_dict_save dict_save_func);
+  void *struct_ptr, t_atom *argv_dict_sub_sub, t_atom *argv_prot, t_dict_save dict_save_func);
 
 // ====  DICT_SAVE  ====
 
@@ -68,7 +68,7 @@ t_dict_save dict_save_func:  Specific function used to save a structure into a s
 Example:  dict_save((t_object *)x, x->dict_sym, gensym("states"), gensym("state save"), 1, state, argv + 2, _state_dict_save);
 */
 t_my_err dict_save(void *x, t_symbol *dict_root_sym, t_symbol *dict_sub_sym, t_symbol *cmd_sym, t_int32 offset,
-	void *struct_ptr, t_atom *argv_dict_sub_sub, t_dict_save dict_save_func);
+  void *struct_ptr, t_atom *argv_dict_sub_sub, t_dict_save dict_save_func);
 
 // ====  DICT_LOAD  ====
 
@@ -86,7 +86,7 @@ t_dict_load dict_load_func:  Specific function used to load a dictionary into a 
 Example:  dict_load((t_object *)x, x->dict_sym, gensym("states"), gensym("state load"), 1, state, argv + 2, _state_dict_load);
 */
 t_my_err dict_load(void *x, t_symbol *dict_root_sym, t_symbol *dict_sub_sym, t_symbol *cmd_sym, t_int32 offset,
-	void *struct_ptr, t_atom *argv_dict_sub_sub, t_dict_load dict_load_func);
+  void *struct_ptr, t_atom *argv_dict_sub_sub, t_dict_load dict_load_func);
 
 // ====  DICT_DELETE_PROTECT  ====
 
@@ -103,7 +103,7 @@ t_atom *argv_prot:  Atom holding an optional protection command: "override" or N
 Example:  dict_delete_protect((t_object *)x, x->dict_sym, gensym("states"), gensym("state delete"), 1, argv + 2, argv + 3);
 */
 t_my_err dict_delete_protect(void *x, t_symbol *dict_root_sym, t_symbol *dict_sub_sym, t_symbol *cmd_sym, t_int32 offset,
-	t_atom *argv_dict_sub_sub, t_atom *argv_prot);
+  t_atom *argv_dict_sub_sub, t_atom *argv_prot);
 
 // ====  DICT_DELETE  ====
 
@@ -119,7 +119,7 @@ t_atom *argv_dict_sub_sub:  Atom holding the name of the sub-sub-dictionary to d
 Example:  dict_delete((t_object *)x, x->dict_sym, gensym("states"), gensym("state delete"), 1, argv + 2);
 */
 t_my_err dict_delete(void *x, t_symbol *dict_root_sym, t_symbol *dict_sub_sym, t_symbol *cmd_sym, t_int32 offset,
-	t_atom *argv_dict_sub_sub);
+  t_atom *argv_dict_sub_sub);
 
 // ====  DICT_RENAME_PROTECT  ====
 
@@ -136,7 +136,7 @@ t_atom *argv_prot:  Atom holding an optional protection command: "override" or N
 Example:  dict_rename_protect((t_object *)x, x->dict_sym, gensym("states"), gensym("state rename"), 1, argv + 2, argv + 3);
 */
 t_my_err dict_rename_protect(void *x, t_symbol *dict_root_sym, t_symbol *dict_sub_sym, t_symbol *cmd_sym, t_int32 offset,
-	t_atom *argv_dict_sub_sub, t_atom *argv_new_dict_sub_sub, t_atom *argv_prot);
+  t_atom *argv_dict_sub_sub, t_atom *argv_new_dict_sub_sub, t_atom *argv_prot);
 
 // ====  DICT_RENAME  ====
 
@@ -152,7 +152,7 @@ t_atom *argv_dict_sub_sub:  Atom holding the name of the sub-sub-dictionary to r
 Example:  dict_rename((t_object *)x, x->dict_sym, gensym("states"), gensym("state rename"), 1, argv + 2);
 */
 t_my_err dict_rename(void *x, t_symbol *dict_root_sym, t_symbol *dict_sub_sym, t_symbol *cmd_sym, t_int32 offset,
-	t_atom *argv_dict_sub_sub, t_atom *argv_new_dict_sub_sub);
+  t_atom *argv_dict_sub_sub, t_atom *argv_new_dict_sub_sub);
 
 // ========  END OF HEADER FILE  ========
 

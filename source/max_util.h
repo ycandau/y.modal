@@ -29,8 +29,8 @@
 
 // ====  ENUM  ====
 
-typedef enum _my_err
-{
+typedef enum _my_err {
+
   ERR_NULL,    // For initialization, should never be returned
   ERR_NONE,
   ERR_ARG_TYPE,
@@ -58,14 +58,14 @@ typedef enum _my_err
 
 // ====  PROCEDURE DECLARATIONS  ====
 
-void mess_sym_long    (void *outlet, t_symbol *sym, t_atom_long l, t_atom *atoms);
-void mess_sym_longs   (void *outlet, t_symbol *sym, t_uint32 n, t_atom_long *l, t_atom *atoms);
-void mess_sym_float   (void *outlet, t_symbol *sym, t_float f, t_atom *atoms);
-void mess_sym_floats  (void *outlet, t_symbol *sym, t_uint32 n, t_float *f, t_atom *atoms);
-void mess_sym_double  (void *outlet, t_symbol *sym, t_double d, t_atom *atoms);
-void mess_sym_doubles (void *outlet, t_symbol *sym, t_uint32 n, t_double *d, t_atom *atoms);
-void mess_sym_sym     (void *outlet, t_symbol *sym, t_symbol *sym2, t_atom *atoms);
-void mess_sym_sing    (void *outlet, t_symbol *sym, char *str, t_atom *atoms);
+void mess_sym_long   (void *outlet, t_symbol *sym, t_atom_long l, t_atom *atoms);
+void mess_sym_longs  (void *outlet, t_symbol *sym, t_uint32 n, t_atom_long *l, t_atom *atoms);
+void mess_sym_float  (void *outlet, t_symbol *sym, t_float f, t_atom *atoms);
+void mess_sym_floats (void *outlet, t_symbol *sym, t_uint32 n, t_float *f, t_atom *atoms);
+void mess_sym_double (void *outlet, t_symbol *sym, t_double d, t_atom *atoms);
+void mess_sym_doubles(void *outlet, t_symbol *sym, t_uint32 n, t_double *d, t_atom *atoms);
+void mess_sym_sym    (void *outlet, t_symbol *sym, t_symbol *sym2, t_atom *atoms);
+void mess_sym_sing   (void *outlet, t_symbol *sym, char *str, t_atom *atoms);
 
 void mess_sing (void *outlet, char *str, t_atom *atoms);
 
