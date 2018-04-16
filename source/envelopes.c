@@ -64,8 +64,9 @@ t_double ramp_none(t_double x, t_double a) {
   return ((x < 0.5) ? 0 : 1);
 }
 
-t_double ramp_none_inv(t_double y, t_double a)    // Technically undefined
-{
+// Technically undefined
+t_double ramp_none_inv(t_double y, t_double a) {
+
   return ((y < 0.5) ? 0 : 1);
 }
 

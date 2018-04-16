@@ -41,7 +41,7 @@ __inline t_int32 random_time_to_smp(t_double min, t_double max, t_double msr) {
 
 // ========  FUNCTION DECLARATIONS  ========
 
-void random_n_of_m(t_int32 n, t_int32 m, t_int32 *index_arr);
+void random_n_of_m(t_int32 n, t_int32 m, t_int32* index_arr);
 
 // ========  END OF HEADER FILE  ========
 

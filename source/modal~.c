@@ -2,10 +2,10 @@
 //
 //  @file modal~.c
 //  @author Yves Candau <ycandau@gmail.com>
-//  
+//
 //  @brief A Max external for modal synthesis. It is essentially a bank of two
 //  pole resonators, with added functionality for manipulating the bank.
-//  
+//
 //  This Source Code Form is subject to the terms of the Mozilla Public
 //  License, v. 2.0. If a copy of the MPL was not distributed with this
 //  file, You can obtain one at http://mozilla.org/MPL/2.0/.
@@ -22,19 +22,19 @@
 //  Global class pointer and static variables
 //==============================================================================
 
-static t_class *modal_class = NULL;
+static t_class* modal_class = NULL;
 
-static t_symbol *sym_empty = NULL;
-static t_symbol *sym_free = NULL;
-static t_symbol *sym_ampl = NULL;
-static t_symbol *sym_freq = NULL;
-static t_symbol *sym_decay = NULL;
+static t_symbol* sym_empty = NULL;
+static t_symbol* sym_free = NULL;
+static t_symbol* sym_ampl = NULL;
+static t_symbol* sym_freq = NULL;
+static t_symbol* sym_decay = NULL;
 
 //==============================================================================
 //  Function declarations
 //==============================================================================
 
-void modal_bang(t_modal *x) {
+void modal_bang(t_modal* x) {
 
   POST("bang");
 }
@@ -44,7 +44,7 @@ void modal_bang(t_modal *x) {
 //
 void C74_EXPORT ext_main(void* r) {
 
-  t_class *c = class_new(
+  t_class* c = class_new(
     "y.modal~",
     (method)modal_new,
     (method)modal_free,
@@ -103,7 +103,7 @@ void C74_EXPORT ext_main(void* r) {
   class_addmethod(c, (method)state_ramp_max,     "ramp_max",     A_GIMME, 0);
   class_addmethod(c, (method)state_velocity,     "velocity",     A_GIMME, 0);
   class_addmethod(c, (method)state_freeze,       "freeze",       A_GIMME, 0);
-  
+
   // Ranges
 
   class_addmethod(c, (method)modal_get_ampl_rng,  "get_ampl_rng",  A_GIMME, 0);
@@ -119,7 +119,7 @@ void C74_EXPORT ext_main(void* r) {
   class_addmethod(c, (method)modal_sel_freq_rng,  "sel_freq_rng",  A_GIMME, 0);
   class_addmethod(c, (method)modal_sel_decay_ind, "sel_decay_ind", A_GIMME, 0);
   class_addmethod(c, (method)modal_sel_decay_rng, "sel_decay_rng", A_GIMME, 0);
-  
+
   CLASS_ATTR_FLOAT(c, "smoothing", 0, t_modal, a_smoothing);
   CLASS_ATTR_LABEL(c, "smoothing", 0, "rms smoothing");
   // XXX CLASS_ATTR_ACCESSORS(c, "smoothing", NULL, NULL);
@@ -131,44 +131,44 @@ void C74_EXPORT ext_main(void* r) {
   class_dspinit(c);
   class_register(CLASS_BOX, c);
   modal_class = c;
-  
+
   // Frequently used symbols
   sym_empty = gensym("");
   sym_free = gensym("free");
   sym_ampl = gensym("ampl");
   sym_freq = gensym("freq");
-  sym_decay = gensym("decay");  
+  sym_decay = gensym("decay");
 }
 
 // ========  NEW INSTANCE ROUTINE: MODAL_NEW  ========
 // Called when the object is created
 
-void *modal_new(t_symbol *sym, t_int32 argc, t_atom *argv) {
+void* modal_new(t_symbol* sym, t_int32 argc, t_atom* argv) {
 
   // ====  MAX initializations  ====
 
-  t_modal *x = NULL;
-  x = (t_modal *)object_alloc(modal_class);
-  
+  t_modal* x = NULL;
+  x = (t_modal*)object_alloc(modal_class);
+
   if (x == NULL) {
     MY_ERR("Object allocation failed.");
     return NULL;
   }
   TRACE("modal_new");
 
-  dsp_setup((t_pxobject *)x, 1);                  // Creating one MSP inlet
+  dsp_setup((t_pxobject*)x, 1);                  // Creating one MSP inlet
 
-  x->outl_float = floatout((t_object *)x);
+  x->outl_float = floatout((t_object*)x);
   x->outl_mess = outlet_new((t_object*)x, NULL);  // Outlet 8: For messages
 
-  outlet_new((t_object *)x, "signal");            // Outlet 7: For signals
-  outlet_new((t_object *)x, "signal");            // Outlet 6: For signals
-  outlet_new((t_object *)x, "signal");            // Outlet 5: For signals
-  outlet_new((t_object *)x, "signal");            // Outlet 4: For signals
-  outlet_new((t_object *)x, "signal");            // Outlet 3: For signals
-  outlet_new((t_object *)x, "signal");            // Outlet 2: For signals
-  outlet_new((t_object *)x, "signal");            // Outlet 1: For signals
-  outlet_new((t_object *)x, "signal");            // Outlet 0: For signals
+  outlet_new((t_object*)x, "signal");            // Outlet 7: For signals
+  outlet_new((t_object*)x, "signal");            // Outlet 6: For signals
+  outlet_new((t_object*)x, "signal");            // Outlet 5: For signals
+  outlet_new((t_object*)x, "signal");            // Outlet 4: For signals
+  outlet_new((t_object*)x, "signal");            // Outlet 3: For signals
+  outlet_new((t_object*)x, "signal");            // Outlet 2: For signals
+  outlet_new((t_object*)x, "signal");            // Outlet 1: For signals
+  outlet_new((t_object*)x, "signal");            // Outlet 0: For signals
 
   x->obj.z_misc |= Z_NO_INPLACE;      // Separate input and output arrays
 
@@ -180,7 +180,7 @@ void *modal_new(t_symbol *sym, t_int32 argc, t_atom *argv) {
   if (argc == 0) {
     x->bank_cnt   = BANK_CNT_DEF;
     x->reson_max = RESON_MAX_DEF;
-    state_cnt = STATE_CNT_DEF; 
+    state_cnt = STATE_CNT_DEF;
   }
   // If one argument is provided, get: the number of banks
   else if ((argc == 1)
@@ -229,7 +229,7 @@ void *modal_new(t_symbol *sym, t_int32 argc, t_atom *argv) {
 
   POST("modal_new:  modal~ object created:  %i banks, %i resonators max, %i states.", x->bank_cnt, x->reson_max, state_cnt);
   POST("  You need to load modal models before using the object.");
-  
+
   // Set pointers to NULL
   x->outp_mess_arr = NULL;
 
@@ -241,7 +241,7 @@ void *modal_new(t_symbol *sym, t_int32 argc, t_atom *argv) {
 
   // Allocating memory for the banks
   x->bank_arr = NULL;
-  x->bank_arr = (t_bank *)sysmem_newptr(sizeof(t_bank) * x->bank_cnt);
+  x->bank_arr = (t_bank*)sysmem_newptr(sizeof(t_bank) * x->bank_cnt);
   if (!x->bank_arr) {
     MY_ERR("modal_new:  Failed to allocate bank_arr.");
     return NULL;
@@ -273,7 +273,7 @@ void *modal_new(t_symbol *sym, t_int32 argc, t_atom *argv) {
   x->dict_sym = sym_empty;
 
   // Allocate memory for outputting messages
-  x->outp_mess_arr = (t_atom *)sysmem_newptr(sizeof(t_atom) * 3 * x->reson_max);
+  x->outp_mess_arr = (t_atom*)sysmem_newptr(sizeof(t_atom) * 3 * x->reson_max);
   if (!x->outp_mess_arr) {
     MY_ERR("modal_new:  Failed to allocate mess_arr.");
     return NULL;
@@ -294,10 +294,10 @@ void *modal_new(t_symbol *sym, t_int32 argc, t_atom *argv) {
 // ========  METHOD: MODAL_FREE  ========
 // Called when the object is deleted
 
-void modal_free(t_modal *x) {
+void modal_free(t_modal* x) {
 
   TRACE("modal_free");
-  
+
   for (int i = 0; i < x->bank_cnt; i++) { bank_free(x, x->bank_arr + i); }
   if (x->bank_arr) { sysmem_freeptr(x->bank_arr); }
 
@@ -306,14 +306,14 @@ void modal_free(t_modal *x) {
 
   if (x->outp_mess_arr) { sysmem_freeptr(x->outp_mess_arr); }
 
-  dsp_free((t_pxobject *)x);
+  dsp_free((t_pxobject*)x);
 }
 
 // ========  METHOD: MODAL_DSP64  ========
 // Called when the DAC is enabled
 
 void modal_dsp64(
-  t_modal *x, t_object *dsp64, t_int32 *count, t_double samplerate,
+  t_modal* x, t_object* dsp64, t_int32* count, t_double samplerate,
   long maxvectorsize, long flags) {
 
   TRACE("modal_dsp64");
@@ -324,7 +324,7 @@ void modal_dsp64(
   // Recalculate everything that depends on the samplerate
   x->samplerate = samplerate;
   x->msr = x->samplerate / 1000;
-  
+
   // Update the banks of resonators
   for (int i = 0; i < x->bank_cnt; i++) { bank_update(x, x->bank_arr + i); }
 }
@@ -332,13 +332,13 @@ void modal_dsp64(
 // ========  METHOD: MODAL_PERFORM64  ========
 
 void modal_perform64(
-  t_modal *x, t_object *dsp64, t_double **ins, long numins, t_double **outs,
-  long numouts, long sampleframes, long flags, void *userparam) {
+  t_modal* x, t_object* dsp64, t_double** ins, long numins, t_double** outs,
+  long numouts, long sampleframes, long flags, void* userparam) {
 
   // Input and output vectors
-  t_double *in = ins[0];
-  t_double *out0 = outs[0], *out1 = outs[1], *out2 = outs[2], *out3 = outs[3];
-  t_double *out4 = outs[4], *out5 = outs[5], *out6 = outs[6], *out7 = outs[7];
+  t_double* in = ins[0];
+  t_double* out0 = outs[0], *out1 = outs[1], *out2 = outs[2], *out3 = outs[3];
+  t_double* out4 = outs[4], *out5 = outs[5], *out6 = outs[6], *out7 = outs[7];
 
   // Set all output vectors to 0
   for (int i = 0; i < sampleframes; i++) {
@@ -349,12 +349,12 @@ void modal_perform64(
   // Loop through all the banks
   for (t_int32 bnk = 0; bnk < x->bank_cnt; bnk++) {
 
-    t_bank *bank = x->bank_arr + bnk;
+    t_bank* bank = x->bank_arr + bnk;
 
     if (bank->is_on == true) {
-      
+
       // Variables for the loop through all the resonators
-      t_resonator *reson = bank->reson_arr;
+      t_resonator* reson = bank->reson_arr;
       t_int32 chunk_len = -1;
       t_int32 counter = 0;
       t_int32 counter_x_vel = 0;
@@ -376,7 +376,7 @@ void modal_perform64(
         out0 = outs[0]; out1 = outs[1]; out2 = outs[2]; out3 = outs[3];
         out4 = outs[4]; out5 = outs[5]; out6 = outs[6]; out7 = outs[7];
         sum_sqr = 0.0;
-        
+
         // Keep looping until all the chunks are processed
         while (counter) {
 
@@ -391,7 +391,7 @@ void modal_perform64(
           if ((cntd_d_vel == 0) && (reson->cntd != 0)) { cntd_d_vel = 1; }  // correct for rounding down to 0 when cntd is not 0
 
           // == Five cases depending on the countdown
-          
+
           // == If the bank is set to freeze
           // == process the whole audio vector with no ramping or countdown
           if (bank->is_frozen) { chunk_len = sampleframes; counter = 0; }
@@ -409,7 +409,7 @@ void modal_perform64(
           // == Countdown shorter than perform cycle:  Keep processing chunks and mode changes
           else { chunk_len = cntd_d_vel; counter -= chunk_len; reson->cntd = 0; }    // counter never gets to -1 in spite of rounding
           //else { chunk_len = reson->cntd; counter -= chunk_len; reson->cntd = 0; }
-          
+
           // ==== Process the chunk depending on the mode of the resonator
 
           // == RESONATOR IS OFF
@@ -524,7 +524,7 @@ void modal_perform64(
               *out6 += tmp * reson->diff_mult[6]; *out7 += tmp * reson->diff_mult[7];
               out0++; out1++; out2++; out3++; out4++; out5++; out6++; out7++; in++;
             }
-          }*/
+          } */
 
           // == OTHERWISE
           // == Post a message error
@@ -549,11 +549,11 @@ void modal_perform64(
   // ==== If the object is setup to output information on the resonators
   if (x->out_type != OUT_TYPE_OFF) {
 
-    t_bank *bank = x->bank_cur;
-    t_atom *mess = x->outp_mess_arr;
+    t_bank* bank = x->bank_cur;
+    t_atom* mess = x->outp_mess_arr;
 
     // == Choose the resonator parameter by which to sort the output: amplitude, frequence, or decay
-    t_int32 *out_sort = NULL;
+    t_int32* out_sort = NULL;
     if      (x->sort_type == OUT_SORT_AMPL)  { out_sort = bank->sort_ampl; }
     else if (x->sort_type == OUT_SORT_FREQ)  { out_sort = bank->sort_freq; }
     else if (x->sort_type == OUT_SORT_DECAY) { out_sort = bank->sort_decay; }
@@ -572,31 +572,40 @@ void modal_perform64(
       for (t_int32 res = 0; res < bank->reson_cnt; res++) {
         atom_setlong(mess++, res % 10);
         atom_setlong(mess++, (t_int32)(res / 10));
-        atom_setlong(mess++, (t_int32)((bank->reson_arr + out_sort[res])->in_A_cur * 100)); }  }
+        atom_setlong(mess++, (t_int32)((bank->reson_arr + out_sort[res])->in_A_cur * 100));
+      }
+    }
 
     // == Output RMS
     else if (x->out_type == OUT_TYPE_RMS) {
       for (t_int32 res = 0; res < bank->reson_cnt; res++) {
         atom_setlong(mess++, res % 10);
         atom_setlong(mess++, (t_int32)(res / 10));
-        atom_setlong(mess++, (t_int32)((bank->reson_arr + out_sort[res])->rms * 100)); }  }
+        atom_setlong(mess++, (t_int32)((bank->reson_arr + out_sort[res])->rms * 100));
+      }
+    }
 
     // == Output channel index (highest channel index if there are more than one)
     else if (x->out_type == OUT_TYPE_CH_I) {
       for (t_int32 res = 0; res < bank->reson_cnt; res++) {
         atom_setlong(mess++, res % 10);
         atom_setlong(mess++, (t_int32)(res / 10));
-        atom_setlong(mess++, (t_int32)((((bank->reson_arr + out_sort[res])->diff_ind + 4) % 8) * 12.5)); }  }
+        atom_setlong(mess++, (t_int32)((((bank->reson_arr + out_sort[res])->diff_ind + 4) % 8) * 12.5));
+      }
+    }
 
     // == Output number of channels
     else if (x->out_type == OUT_TYPE_CH_N) {
       for (t_int32 res = 0; res < bank->reson_cnt; res++) {
         atom_setlong(mess++, res % 10);
         atom_setlong(mess++, (t_int32)(res / 10));
-        atom_setlong(mess++, (t_int32)((bank->reson_arr + out_sort[res])->diff_cnt * 12.5)); }  }
-    
+        atom_setlong(mess++, (t_int32)((bank->reson_arr + out_sort[res])->diff_cnt * 12.5));
+      }
+    }
+
     // == Output the list for the matrixctrl object
-    outlet_anything(x->outl_mess, gensym("matrixctrl"), bank->reson_cnt * 3, x->outp_mess_arr); }
+    outlet_anything(x->outl_mess, gensym("matrixctrl"), bank->reson_cnt * 3, x->outp_mess_arr);
+  }
 
   // ==== Output a float for the scrolling multislider object
   outlet_float(x->outl_float, x->reson_cur->rms);
@@ -604,14 +613,16 @@ void modal_perform64(
 
 // ========  METHOD: MODAL_ASSIST  ========
 
-void modal_assist(t_modal *x, void *b, long msg, t_int32 arg, char *str) {
+void modal_assist(t_modal* x, void* b, long msg, t_int32 arg, char* str) {
 
   //TRACE("modal_assist");
-  
+
   if (msg == ASSIST_INLET) {
     switch (arg) {
     case 0: sprintf(str, "Inlet 0: All purpose (signal, list)"); break;
-    default: break; } }
+    default: break;
+  }
+}
 
   else if (msg == ASSIST_OUTLET) {
     switch (arg) {
@@ -624,7 +635,9 @@ void modal_assist(t_modal *x, void *b, long msg, t_int32 arg, char *str) {
     case 6: sprintf(str, "Outlet 6: For signals - Channel 7 (signal)"); break;
     case 7: sprintf(str, "Outlet 7: For signals - Channel 8 (signal)"); break;
     case 8: sprintf(str, "Outlet 8: For messages (list)"); break;
-    default: break; } }
+    default: break;
+  }
+}
 }
 
 // ====  METHOD: BANK_FIND  ====
@@ -632,7 +645,7 @@ void modal_assist(t_modal *x, void *b, long msg, t_int32 arg, char *str) {
 // an index, or a symbol which could be free or the name of a bank
 // Returns a pointer to the corresponding bank or NULL if no bank is found
 
-t_bank *bank_find(t_modal *x, t_atom *argv, t_symbol *sym) {
+t_bank* bank_find(t_modal* x, t_atom* argv, t_symbol* sym) {
 
   // If the atom contains an int
   if (atom_gettype(argv) == A_LONG) {
@@ -647,7 +660,7 @@ t_bank *bank_find(t_modal *x, t_atom *argv, t_symbol *sym) {
   else if (atom_gettype(argv) == A_SYM) {
 
     // Test if the symbol is one of the bank names
-    t_symbol *sym = atom_getsym(argv);
+    t_symbol* sym = atom_getsym(argv);
     for (int i = 0; i < x->bank_cnt; i++) {
       if ((x->bank_arr + i)->name == sym) {
         return (x->bank_arr + i);
@@ -661,8 +674,8 @@ t_bank *bank_find(t_modal *x, t_atom *argv, t_symbol *sym) {
 
 // ====  METHOD: MODAL_FIND_RESON  ====
 
-t_resonator *modal_find_reson(
-  t_modal *x, t_bank *bank, t_atom *argv, t_symbol *sym) {
+t_resonator* modal_find_reson(
+  t_modal* x, t_bank* bank, t_atom* argv, t_symbol* sym) {
 
   // If the atom contains an int
   if (atom_gettype(argv) == A_LONG) {
@@ -670,13 +683,15 @@ t_resonator *modal_find_reson(
     // Test if the index is valid
     t_int32 index = (t_int32)atom_getlong(argv);
     if ((index >= 0) && (index < bank->reson_cnt)) {
-      
+
       // Determine the index depending on the sorting method
       if      (x->sort_type == OUT_SORT_AMPL)  { index = bank->sort_ampl[index]; }
       else if (x->sort_type == OUT_SORT_FREQ)  { index = bank->sort_freq[index]; }
       else if (x->sort_type == OUT_SORT_DECAY) { index = bank->sort_decay[index]; }
 
-      return (bank->reson_arr + index); } }
+      return (bank->reson_arr + index);
+    }
+  }
 
   // Otherwise return NULL
   MY_ERR("%s:  Invalid resonator reference.", sym->s_name);
@@ -685,7 +700,7 @@ t_resonator *modal_find_reson(
 
 // ====  METHOD: MODAL_OUT_TYPE  ====
 
-void modal_out_type(t_modal *x, t_symbol *type) {
+void modal_out_type(t_modal* x, t_symbol* type) {
 
   if      (type == gensym("off"))    { x->out_type = OUT_TYPE_OFF; }
   else if (type == gensym("input"))  { x->out_type = OUT_TYPE_INP; }
@@ -698,7 +713,7 @@ void modal_out_type(t_modal *x, t_symbol *type) {
 
 // ====  METHOD: MODAL_OUT_SORT  ====
 
-void modal_out_sort(t_modal *x, t_symbol *type) {
+void modal_out_sort(t_modal* x, t_symbol* type) {
 
 
   if      (type == gensym("ampl"))  { x->sort_type = OUT_SORT_AMPL; }
@@ -715,7 +730,7 @@ void modal_out_sort(t_modal *x, t_symbol *type) {
 //   Arg 1:  The name of the new bank (sym)
 //   Arg 2:  Optional file name [sym]
 
-void io_import(t_modal *x, t_symbol *sym, t_int32 argc, t_atom *argv) {
+void io_import(t_modal* x, t_symbol* sym, t_int32 argc, t_atom* argv) {
 
   TRACE("io_import");
 
@@ -724,8 +739,8 @@ void io_import(t_modal *x, t_symbol *sym, t_int32 argc, t_atom *argv) {
   t_handle file_text = NULL;
 
   t_bool test_arg = true;
-  t_bank *bank;
-  t_symbol *name;
+  t_bank* bank;
+  t_symbol* name;
 
   // The number of arguments should be two or three
   if ((argc != 2) && (argc != 3)) { test_arg = false; }
@@ -738,7 +753,8 @@ void io_import(t_modal *x, t_symbol *sym, t_int32 argc, t_atom *argv) {
 
     // The second argument should be a symbol with the name of the new bank
     name = atom_getsym(argv + 1);
-    if (name == sym_empty) { test_arg = false; } }
+    if (name == sym_empty) { test_arg = false; }
+  }
 
   // If any of the previous tests failed the arguments are invalid
   if (test_arg == false) {
@@ -746,11 +762,12 @@ void io_import(t_modal *x, t_symbol *sym, t_int32 argc, t_atom *argv) {
     MY_ERR2("  Arg 0:  The bank to import into (int/sym):  index / name / \"free\"");
     MY_ERR2("  Arg 1:  The name of the new bank (sym)");
     MY_ERR2("  Arg 2:  Optional file name [sym]");
-    goto MODAL_IMPORT_END; }
+    goto MODAL_IMPORT_END;
+  }
 
   // Variables for modal file selection
   t_bool     test_file = false;
-  t_symbol  *file_sym;
+  t_symbol*  file_sym;
   char       file_name[MAX_FILENAME_CHARS];
   short       file_path;
   t_fileinfo file_info;
@@ -762,36 +779,42 @@ void io_import(t_modal *x, t_symbol *sym, t_int32 argc, t_atom *argv) {
 
     // Test that the third argument is a symbol
     if (file_sym == sym_empty) {
-      MY_ERR("%s:  Arg 2:  Invalid argument type: symbol expected.", sym->s_name); }
-  
+      MY_ERR("%s:  Arg 2:  Invalid argument type: symbol expected.", sym->s_name);
+    }
+
     // Test that the third argument contains a valid path and name
     else if (path_frompathname(file_sym->s_name, &file_path, file_name)) {
-      MY_ERR("%s:  Arg 2:  Invalid path and file name.", sym->s_name); }
+      MY_ERR("%s:  Arg 2:  Invalid path and file name.", sym->s_name);
+    }
 
     // Test that the file exists
     else if (path_fileinfo(file_name, file_path, &file_info)) {
-      MY_ERR("%s:  Arg 2:  File not found.", sym->s_name); }
+      MY_ERR("%s:  Arg 2:  File not found.", sym->s_name);
+    }
 
-    else { test_file = true; } }
-  
+    else { test_file = true; }
+  }
+
   // If 2 arguments or the file was not found, open a dialog box
   if ((argc == 2) || (test_file == false)) {
     open_promptset("Choose a text file with modal parameters.");
     if (open_dialog(file_name, &file_path, &file_type, &file_type, 1) != 0)
-      { goto MODAL_IMPORT_END; } }    // If no file selected cancel
-  
+      { goto MODAL_IMPORT_END; }
+    }  // If no file selected cancel
+
   // Open the file
   if (path_opensysfile(file_name, file_path, &file_handle, PATH_READ_PERM)) {
-    MY_ERR("%s:  Arg 2:  Failed to open the file.", sym->s_name); goto MODAL_IMPORT_END; }
+    MY_ERR("%s:  Arg 2:  Failed to open the file.", sym->s_name); goto MODAL_IMPORT_END;
+  }
 
   // Read the file into text
   file_text = sysmem_newhandle(0);
   // TEXT_NULL_TERMINATE is important, otherwise the string has no end
   sysfile_readtextfile(file_handle, file_text, 0, TEXT_LB_NATIVE | TEXT_NULL_TERMINATE);
-  
+
   // Test the validity of the file content
   int nb = 0, d_ptr = 0, valid = 0;
-  char *ptr = *file_text;
+  char* ptr = *file_text;
 
   // The first token should be an int
   valid = sscanf_s(ptr, "%i %n", &nb, &d_ptr);
@@ -801,14 +824,15 @@ void io_import(t_modal *x, t_symbol *sym, t_int32 argc, t_atom *argv) {
   while ((valid == 1) && (cntd--)) {
     float f;
     ptr += d_ptr;
-    valid = sscanf_s(ptr, "%f %n", &f, &d_ptr); }
-  
+    valid = sscanf_s(ptr, "%f %n", &f, &d_ptr);
+  }
+
   // If sscanf_s failed to read
   if (valid != 1) { MY_ERR("%s:  Invalid data in the modal file %s.", file_name, sym->s_name); }
 
   // ==== Otherwise load the values
   else {
-    
+
     // Free the existing bank and create a new one
     bank_free(x, bank);
     if (bank_new(x, bank, nb) == ERR_ALLOC) { goto MODAL_IMPORT_END; }
@@ -819,12 +843,12 @@ void io_import(t_modal *x, t_symbol *sym, t_int32 argc, t_atom *argv) {
 
     // Read the data from the text file
     int tmp;
-    t_resonator *reson;
+    t_resonator* reson;
     ptr = *file_text;
 
     // Read the number of resonators
     sscanf_s(ptr, "%i %n", &tmp, &d_ptr); ptr += d_ptr;
-    
+
     // Read the resonator parameters
     float ampl, freq, decay;
     for (t_int32 i = 0; i < bank->reson_cnt; i++) {
@@ -835,12 +859,14 @@ void io_import(t_modal *x, t_symbol *sym, t_int32 argc, t_atom *argv) {
       reson = bank->reson_arr + i;
       reson->ampl_ref   = (t_double)ampl;
       reson->freq_ref  = (t_double)freq;
-      reson->decay_ref = (t_double)decay; }
+      reson->decay_ref = (t_double)decay;
+    }
 
     // Update and sort the resonators by amplitude, frequency and decay
     bank_update(x, bank);
-    bank_sort(x, bank); }
-    
+    bank_sort(x, bank);
+  }
+
   // Send out a message to indicate completion of import
   // NB: Using mess_arr was not working, possibly because the function was deferred
   t_atom mess_arr[4];
@@ -859,11 +885,11 @@ void io_import(t_modal *x, t_symbol *sym, t_int32 argc, t_atom *argv) {
 
 // ====  METHOD: IO_DICTIONARY  ====
 
-void io_dictionary(t_modal *x, t_symbol *dict_sym) {
+void io_dictionary(t_modal* x, t_symbol* dict_sym) {
 
   TRACE("io_dictionary");
-  
-  t_dictionary *dict = dictobj_findregistered_retain(dict_sym);
+
+  t_dictionary* dict = dictobj_findregistered_retain(dict_sym);
 
   if (!dict) { MY_ERR("io_dictionary:  There is no dictionary %s.", dict_sym->s_name); return; }
 
@@ -877,19 +903,19 @@ void io_dictionary(t_modal *x, t_symbol *dict_sym) {
 //   Arg 0:  The name of the bank to load in the dictionary (sym)
 //   Arg 1:  The bank to load into (int/sym):  index / name / "free"
 
-void io_load(t_modal *x, t_symbol *sym, t_int32 argc, t_atom *argv) {
+void io_load(t_modal* x, t_symbol* sym, t_int32 argc, t_atom* argv) {
 
   TRACE("io_load");
 
   // Pointers to structures that need cleanup
-  t_dictionary *dict = NULL;
+  t_dictionary* dict = NULL;
 
   // Get the name of the bank to look for in the dictionary
-  t_symbol *bank_sym = atom_getsym(argv);
+  t_symbol* bank_sym = atom_getsym(argv);
   if (bank_sym == sym_empty) { MY_ERR("io_load:  Arg 0:  A bank name to look for in the dictionary is required."); goto MODAL_LOAD_END; }
 
   // Get the bank to load into
-  t_bank *bank = bank_find(x, argv + 1, sym);
+  t_bank* bank = bank_find(x, argv + 1, sym);
   if (bank == NULL) { MY_ERR("io_load:  Arg 1:  The bank to load into was not found."); goto MODAL_LOAD_END; }
 
   // Test if the main dictionary is found
@@ -897,22 +923,25 @@ void io_load(t_modal *x, t_symbol *sym, t_int32 argc, t_atom *argv) {
   if (!dict) { MY_ERR("io_load:  There is no main dictionary %s.", x->dict_sym->s_name); goto MODAL_LOAD_END; }
 
   // Open the subdictionary with all the banks
-  t_dictionary *dict_all_banks = NULL;
-  dictionary_getdictionary(dict, gensym("banks"), (t_object **)&dict_all_banks);
+  t_dictionary* dict_all_banks = NULL;
+  dictionary_getdictionary(dict, gensym("banks"), (t_object**)&dict_all_banks);
   if (dict_all_banks == NULL) {
-    MY_ERR("io_load:  The main dictionary %s does not have a subdictionary for the banks.", x->dict_sym->s_name); goto MODAL_LOAD_END;  }
+    MY_ERR("io_load:  The main dictionary %s does not have a subdictionary for the banks.", x->dict_sym->s_name); goto MODAL_LOAD_END;
+  }
 
   // Look for the specific bank we want to load from the dictionary
-  t_dictionary *dict_bank = NULL;
-  dictionary_getdictionary(dict_all_banks, bank_sym, (t_object **)&dict_bank);
+  t_dictionary* dict_bank = NULL;
+  dictionary_getdictionary(dict_all_banks, bank_sym, (t_object**)&dict_bank);
   if (dict_bank == NULL) {
-    MY_ERR("io_load:  The bank %s was not found in the main dictionary %s.", bank_sym->s_name, x->dict_sym->s_name); goto MODAL_LOAD_END; }
+    MY_ERR("io_load:  The bank %s was not found in the main dictionary %s.", bank_sym->s_name, x->dict_sym->s_name); goto MODAL_LOAD_END;
+  }
 
   // Get the number of resonators
   t_atom_long a_al = 0;
   dictionary_getlong(dict_bank, gensym("reson_cnt"), &a_al);
   if ((a_al < 1) || (a_al > x->reson_max)) {
-    MY_ERR("io_load:  Invalid number of resonators: %i. Expected: 1 to %i.", a_al, x->reson_max); goto MODAL_LOAD_END; }
+    MY_ERR("io_load:  Invalid number of resonators: %i. Expected: 1 to %i.", a_al, x->reson_max); goto MODAL_LOAD_END;
+  }
 
   // Free the existing bank and create a new one
   bank_free(x, bank);
@@ -924,23 +953,25 @@ void io_load(t_modal *x, t_symbol *sym, t_int32 argc, t_atom *argv) {
   dictionary_getfloat(dict_bank, gensym("gain"), &a_d); bank->gain = (t_double)a_d;
 
   // Get the array of atoms
-  t_atom *atom_arr = NULL;
+  t_atom* atom_arr = NULL;
   long a_l = 0;
   dictionary_getatoms(dict_bank, gensym("resonators"), &a_l, &atom_arr);
 
   // The number of atoms in the array should match the number of resonators previously retrieved
   if (a_l != bank->reson_cnt) {
-    MY_ERR("io_load:  The number of resonators is inconsistent with the number of parameters provided."); goto MODAL_LOAD_END; }
+    MY_ERR("io_load:  The number of resonators is inconsistent with the number of parameters provided."); goto MODAL_LOAD_END;
+  }
 
   // Read the data for all the resonators
-  t_resonator  *reson;
-  t_dictionary *dict_reson;
+  t_resonator*  reson;
+  t_dictionary* dict_reson;
   for (t_int32 i = 0; i < bank->reson_cnt; i++) {
     reson = bank->reson_arr + i;
-    dict_reson = (t_dictionary *)atom_getobj(atom_arr + i);
+    dict_reson = (t_dictionary*)atom_getobj(atom_arr + i);
     dictionary_getfloat(dict_reson, gensym("ampl"),  &a_d); reson->ampl_ref   = a_d;
     dictionary_getfloat(dict_reson, gensym("freq"),  &a_d); reson->freq_ref   = a_d;
-    dictionary_getfloat(dict_reson, gensym("decay"), &a_d); reson->decay_ref = a_d; }
+    dictionary_getfloat(dict_reson, gensym("decay"), &a_d); reson->decay_ref = a_d;
+  }
 
   // Update and sort the resonators by amplitude, frequency and decay
   bank_update(x, bank);
@@ -953,7 +984,7 @@ void io_load(t_modal *x, t_symbol *sym, t_int32 argc, t_atom *argv) {
   atom_setlong(mess_arr + 2, bank->reson_cnt);
   atom_setfloat(mess_arr + 3, bank->gain);
   outlet_anything(x->outl_mess, gensym("load"), 4, mess_arr);
-  
+
   // Release the main dictionary
   MODAL_LOAD_END:
   if (dict)   { dictobj_release(dict); }
@@ -967,29 +998,31 @@ void io_load(t_modal *x, t_symbol *sym, t_int32 argc, t_atom *argv) {
 //   Arg 1:  The name to save it under
 //   Arg 2:  Optional argument "protect" or "override"
 
-void io_save(t_modal *x, t_symbol *sym, t_int32 argc, t_atom *argv) {
+void io_save(t_modal* x, t_symbol* sym, t_int32 argc, t_atom* argv) {
 
   TRACE("io_save");
 
   // Pointers to structures that need cleanup
-  t_atom       *atoms = NULL;
-  t_dictionary *dict  = NULL;
+  t_atom*       atoms = NULL;
+  t_dictionary* dict  = NULL;
 
   // Intercept notifications generated when the patcher is saved
   if (sym != gensym("save")) { goto MODAL_SAVE_END; }
 
   // Get the bank to save into the dictionary
-  t_bank *bank = bank_find(x, argv, sym);
+  t_bank* bank = bank_find(x, argv, sym);
   if (bank == NULL) {
-    MY_ERR("io_save:  Arg 0:  The bank to save was not found."); goto MODAL_SAVE_END; }
+    MY_ERR("io_save:  Arg 0:  The bank to save was not found."); goto MODAL_SAVE_END;
+  }
 
   // Get the name under which to save it
-  t_symbol *bank_sym = atom_getsym(argv + 1);
+  t_symbol* bank_sym = atom_getsym(argv + 1);
   if (bank_sym == sym_empty) {
-    MY_ERR("io_save:  Arg 1:  A name to save the bank under is required."); goto MODAL_SAVE_END; }
+    MY_ERR("io_save:  Arg 1:  A name to save the bank under is required."); goto MODAL_SAVE_END;
+  }
 
   // Read the optional third argument
-  t_symbol *arg2 = sym_empty;
+  t_symbol* arg2 = sym_empty;
   if (argc == 3) { arg2 = atom_getsym(argv + 2); }
   if ((arg2 != gensym("protect")) && (arg2 != gensym("override"))) { arg2 = sym_empty; }
 
@@ -998,20 +1031,21 @@ void io_save(t_modal *x, t_symbol *sym, t_int32 argc, t_atom *argv) {
   if (!dict) { MY_ERR("io_save:  There is no dictionary %s.", x->dict_sym->s_name); goto MODAL_SAVE_END; }
 
   // Test if a subdictionary for the banks already exists
-  t_dictionary *dict_all_banks = NULL;
-  dictionary_getdictionary(dict, gensym("banks"), (t_object **)&dict_all_banks);
+  t_dictionary* dict_all_banks = NULL;
+  dictionary_getdictionary(dict, gensym("banks"), (t_object**)&dict_all_banks);
 
   // If not create one and append it to the main dictionary
   // Do not free because ownership is passed on to the main dictionary dict
   if (dict_all_banks == NULL) {
     dict_all_banks = dictionary_new();
-    dictionary_appenddictionary(dict, gensym("banks"), (t_object *)dict_all_banks);  }
+    dictionary_appenddictionary(dict, gensym("banks"), (t_object*)dict_all_banks);
+  }
 
   // Test if a subdictionary for the bank already exists
-  t_dictionary *dict_bank = NULL;
-  t_symbol *is_protect = sym_empty;
+  t_dictionary* dict_bank = NULL;
+  t_symbol* is_protect = sym_empty;
 
-  dictionary_getdictionary(dict_all_banks, bank_sym, (t_object **)&dict_bank);
+  dictionary_getdictionary(dict_all_banks, bank_sym, (t_object**)&dict_bank);
   if (dict_bank != NULL) {
 
     // Test if the bank is write protected
@@ -1020,8 +1054,10 @@ void io_save(t_modal *x, t_symbol *sym, t_int32 argc, t_atom *argv) {
     // Only save if the third argument is "protect" or "override"
     if ((is_protect == gensym("true")) && (arg2 == sym_empty)) {
       MY_ERR("io_save:  The dictionary bank %s is write protected. Use \"protect\" or \"override\" to save over it.", bank_sym->s_name);
-      goto MODAL_SAVE_END; } }
-    
+      goto MODAL_SAVE_END;
+    }
+  }
+
   // Create a subdictionary for the bank and append it to dict_all_banks. Do not free.
   if (arg2 == gensym("protect")) { is_protect = gensym("true"); }
   else { is_protect = gensym("false"); }
@@ -1030,21 +1066,23 @@ void io_save(t_modal *x, t_symbol *sym, t_int32 argc, t_atom *argv) {
     @ampl_min %f @ampl_max %f @freq_min %f @freq_max %f @decay_min %f @decay_max %f",
     bank->name->s_name, bank->reson_cnt, bank->gain, is_protect->s_name,
     bank->ampl_min, bank->ampl_max, bank->freq_min, bank->freq_max, bank->decay_min, bank->decay_max);
-  dictionary_appenddictionary(dict_all_banks, bank_sym, (t_object *)dict_bank);
-  
+  dictionary_appenddictionary(dict_all_banks, bank_sym, (t_object*)dict_bank);
+
   // Create an array of atoms for the resonators
-  atoms = (t_atom *)sysmem_newptr(sizeof(t_atom) * bank->reson_cnt);
+  atoms = (t_atom*)sysmem_newptr(sizeof(t_atom) * bank->reson_cnt);
   if (atoms == NULL) {
-    MY_ERR("io_save:  Failed to allocate a temporary array of atoms."); goto MODAL_SAVE_END; }
+    MY_ERR("io_save:  Failed to allocate a temporary array of atoms."); goto MODAL_SAVE_END;
+  }
 
   // Create a subdictionary for each resonator, put each in the array of atoms
-  t_resonator  *reson = NULL;
-  t_dictionary *dict_reson = NULL;
+  t_resonator*  reson = NULL;
+  t_dictionary* dict_reson = NULL;
   for (t_int32 i = 0; i < bank->reson_cnt; i++) {
     reson = bank->reson_arr + i;
     dict_reson = dictionary_sprintf("@index %i @ampl %f @freq %f @decay %f @b1 %f @b2 %f",
       i, reson->a0, reson->freq, reson->decay, reson->b1, reson->b2);
-    atom_setobj(atoms + i, dict_reson); }
+    atom_setobj(atoms + i, dict_reson);
+  }
 
   // Append the array of atoms to dict_bank. The atoms are copied.
   dictionary_appendatoms(dict_bank, gensym("resonators"), bank->reson_cnt, atoms);
@@ -1055,7 +1093,7 @@ void io_save(t_modal *x, t_symbol *sym, t_int32 argc, t_atom *argv) {
   atom_setsym(mess_arr + 1, bank_sym);
   atom_setlong(mess_arr + 2, bank->reson_cnt);
   outlet_anything(x->outl_mess, gensym("save"), 3, mess_arr);
-  
+
   // Free the array of atoms and release the main dictionary
   MODAL_SAVE_END:
   if (atoms) { sysmem_freeptr(atoms); }
@@ -1069,34 +1107,36 @@ void io_save(t_modal *x, t_symbol *sym, t_int32 argc, t_atom *argv) {
 //   Arg 0:  The bank to split into the dictionary (int/sym):  index / name
 //   Arg 1:  The name to save it under. The second bank will be ..._rem
 
-void io_split(t_modal *x, t_symbol *sym, t_int32 argc, t_atom *argv) {
+void io_split(t_modal* x, t_symbol* sym, t_int32 argc, t_atom* argv) {
 
   TRACE("io_split");
 
   // Pointers to structures that need cleanup
-  char         *name = NULL;
-  t_atom       *atoms = NULL;
-  t_atom       *atoms_rem = NULL;
-  t_dictionary *dict  = NULL;
+  char*         name = NULL;
+  t_atom*       atoms = NULL;
+  t_atom*       atoms_rem = NULL;
+  t_dictionary* dict  = NULL;
 
   // Get the bank to save into the dictionary
-  t_bank *bank = bank_find(x, argv, sym);
+  t_bank* bank = bank_find(x, argv, sym);
   if (bank == NULL) {
-    MY_ERR("io_save:  Arg 0:  The bank to save was not found."); goto MODAL_SPLIT_END; }
+    MY_ERR("io_save:  Arg 0:  The bank to save was not found."); goto MODAL_SPLIT_END;
+  }
 
   // Get the name under which to save it
-  t_symbol *bank_sym = atom_getsym(argv + 1);
+  t_symbol* bank_sym = atom_getsym(argv + 1);
   if (bank_sym == sym_empty) {
-    MY_ERR("io_save:  Arg 1:  A name to save the bank under is required."); goto MODAL_SPLIT_END; }
+    MY_ERR("io_save:  Arg 1:  A name to save the bank under is required."); goto MODAL_SPLIT_END;
+  }
 
   // Set the name for the second bank with the removed resonators
-  name = (char *)sysmem_newptr(sizeof(char) * (long)(strlen(bank_sym->s_name) + 4));
+  name = (char*)sysmem_newptr(sizeof(char) * (long)(strlen(bank_sym->s_name) + 4));
   if (name == NULL) { MY_ERR("io_save:  Failed to allocate a temporary string."); goto MODAL_SPLIT_END; }
 
   strcpy(name, bank_sym->s_name);
   strcat(name, "_rem");
-  t_symbol *bank_rem_sym = gensym(name);
-  
+  t_symbol* bank_rem_sym = gensym(name);
+
   POST("Split:  name: %s remainder: %s", bank_sym->s_name, bank_rem_sym->s_name);
 
   // Test if the main dictionary is found
@@ -1104,28 +1144,30 @@ void io_split(t_modal *x, t_symbol *sym, t_int32 argc, t_atom *argv) {
   if (!dict) { MY_ERR("io_save:  There is no dictionary %s.", x->dict_sym->s_name); goto MODAL_SPLIT_END; }
 
   // Test if a subdictionary for the banks already exists
-  t_dictionary *dict_all_banks = NULL;
-  dictionary_getdictionary(dict, gensym("banks"), (t_object **)&dict_all_banks);
+  t_dictionary* dict_all_banks = NULL;
+  dictionary_getdictionary(dict, gensym("banks"), (t_object**)&dict_all_banks);
 
   // If not create one and append it to the main dictionary
   // Do not free because ownership is passed on to the main dictionary dict
   if (dict_all_banks == NULL) {
     dict_all_banks = dictionary_new();
-    dictionary_appenddictionary(dict, gensym("banks"), (t_object *)dict_all_banks);  }
+    dictionary_appenddictionary(dict, gensym("banks"), (t_object*)dict_all_banks);
+  }
 
   // Create two arrays of atoms for the resonators
-  atoms      = (t_atom *)sysmem_newptr(sizeof(t_atom) * bank->reson_cnt);
-  atoms_rem = (t_atom *)sysmem_newptr(sizeof(t_atom) * bank->reson_cnt);
+  atoms      = (t_atom*)sysmem_newptr(sizeof(t_atom) * bank->reson_cnt);
+  atoms_rem = (t_atom*)sysmem_newptr(sizeof(t_atom) * bank->reson_cnt);
 
   if ((atoms == NULL) || (atoms_rem == NULL)) {
-    MY_ERR("io_save:  Failed to allocate a temporary array of atoms."); goto MODAL_SPLIT_END; }
+    MY_ERR("io_save:  Failed to allocate a temporary array of atoms."); goto MODAL_SPLIT_END;
+  }
 
   // Create a subdictionary for each resonator, put each in one of the array of atoms
-  t_resonator  *reson = NULL;
-  t_dictionary *dict_reson = NULL;
+  t_resonator*  reson = NULL;
+  t_dictionary* dict_reson = NULL;
 
   t_int32 ind;
-  t_atom *p_atom;
+  t_atom* p_atom;
 
   t_int32 cnt1 = 0, cnt2 = 0;
   t_double ampl1_min = bank->ampl_max, ampl2_min = bank->ampl_max;
@@ -1134,7 +1176,7 @@ void io_split(t_modal *x, t_symbol *sym, t_int32 argc, t_atom *argv) {
   t_double freq1_max = bank->freq_min, freq2_max = bank->freq_min;
   t_double decay1_min = bank->decay_max, decay2_min = bank->decay_max;
   t_double decay1_max = bank->decay_min, decay2_max = bank->decay_min;
-  
+
   for (t_int32 res = 0; res < bank->reson_cnt; res++) {
     reson = bank->reson_arr + res;
 
@@ -1147,7 +1189,8 @@ void io_split(t_modal *x, t_symbol *sym, t_int32 argc, t_atom *argv) {
       if (reson->freq < freq1_min) { freq1_min = reson->freq; }
       if (reson->freq > freq1_max) { freq1_max = reson->freq; }
       if (reson->decay < decay1_min) { decay1_min = reson->decay; }
-      if (reson->decay > decay1_max) { decay1_max = reson->decay; }  }
+      if (reson->decay > decay1_max) { decay1_max = reson->decay; }
+    }
 
     else {
       ind = cnt2;
@@ -1158,38 +1201,42 @@ void io_split(t_modal *x, t_symbol *sym, t_int32 argc, t_atom *argv) {
       if (reson->freq < freq2_min) { freq2_min = reson->freq; }
       if (reson->freq > freq2_max) { freq2_max = reson->freq; }
       if (reson->decay < decay2_min) { decay2_min = reson->decay; }
-      if (reson->decay > decay2_max) { decay2_max = reson->decay; } }
+      if (reson->decay > decay2_max) { decay2_max = reson->decay; }
+    }
 
     dict_reson = dictionary_sprintf("@index %i @ampl %f @freq %f @decay %f @b1 %f @b2 %f",
       ind, reson->a0, reson->freq, reson->decay, reson->b1, reson->b2);
-    atom_setobj(p_atom, dict_reson); }
+    atom_setobj(p_atom, dict_reson);
+  }
 
-  // If 
+  // If
 
   if (cnt1 != 0) {
 
   // Create a subdictionary for the bank and append it to dict_all_banks. Do not free.
-  t_dictionary *dict_bank = dictionary_sprintf("@from %s @reson_cnt %i @gain %f @protected %s \
+  t_dictionary* dict_bank = dictionary_sprintf("@from %s @reson_cnt %i @gain %f @protected %s \
     @ampl_min %f @ampl_max %f @freq_min %f @freq_max %f @decay_min %f @decay_max %f",
     bank->name->s_name, cnt1, bank->gain, "false",
     ampl1_min, ampl1_max, freq1_min, freq1_max, decay1_min, decay1_max);
-  dictionary_appenddictionary(dict_all_banks, bank_sym, (t_object *)dict_bank);
+  dictionary_appenddictionary(dict_all_banks, bank_sym, (t_object*)dict_bank);
 
   // Append the array of atoms to dict_bank. The atoms are copied.
-  dictionary_appendatoms(dict_bank, gensym("resonators"), cnt1, atoms); }
+  dictionary_appendatoms(dict_bank, gensym("resonators"), cnt1, atoms);
+}
 
   if (cnt2 != 0) {
 
   // Create a subdictionary for the bank and append it to dict_all_banks. Do not free.
-  t_dictionary *dict_bank_rem = dictionary_sprintf("@from %s @reson_cnt %i @gain %f @protected %s \
+  t_dictionary* dict_bank_rem = dictionary_sprintf("@from %s @reson_cnt %i @gain %f @protected %s \
     @ampl_min %f @ampl_max %f @freq_min %f @freq_max %f @decay_min %f @decay_max %f",
     bank->name->s_name, cnt2, bank->gain, "false",
     ampl2_min, ampl2_max, freq2_min, freq2_max, decay2_min, decay2_max);
-  dictionary_appenddictionary(dict_all_banks, bank_rem_sym, (t_object *)dict_bank_rem);
+  dictionary_appenddictionary(dict_all_banks, bank_rem_sym, (t_object*)dict_bank_rem);
 
   // Append the array of atoms to dict_bank_rem. The atoms are copied.
-  dictionary_appendatoms(dict_bank_rem, gensym("resonators"), cnt2, atoms_rem); }
-  
+  dictionary_appendatoms(dict_bank_rem, gensym("resonators"), cnt2, atoms_rem);
+}
+
   // Send out a message to indicate completion of load
   t_atom mess_arr[5];
   atom_setlong(mess_arr, bank - x->bank_arr);
@@ -1198,7 +1245,7 @@ void io_split(t_modal *x, t_symbol *sym, t_int32 argc, t_atom *argv) {
   atom_setsym(mess_arr + 3, bank_rem_sym);
   atom_setlong(mess_arr + 4, cnt2);
   outlet_anything(x->outl_mess, gensym("split"), 5, mess_arr);
-  
+
   // Free the array of atoms and release the main dictionary
 MODAL_SPLIT_END:
   if (name)       { sysmem_freeptr(name); }
@@ -1211,19 +1258,21 @@ MODAL_SPLIT_END:
 // ====  METHOD: IO_JOIN  ====
 // Join two loaded banks into one.
 
-void io_join(t_modal *x, t_symbol *sym, t_int32 argc, t_atom *argv) {
+void io_join(t_modal* x, t_symbol* sym, t_int32 argc, t_atom* argv) {
 
   TRACE("io_join");
 
   // Get the first bank
-  t_bank *bank1 = bank_find(x, argv, sym);
+  t_bank* bank1 = bank_find(x, argv, sym);
   if (bank1 == NULL) {
-    MY_ERR("io_join:  Arg 0:  The first bank to join was not found."); return; }
+    MY_ERR("io_join:  Arg 0:  The first bank to join was not found."); return;
+  }
 
   // Get the second bank to join with the first
-  t_bank *bank2 = bank_find(x, argv + 1, sym);
+  t_bank* bank2 = bank_find(x, argv + 1, sym);
   if (bank2 == NULL) {
-    MY_ERR("io_join:  Arg 1:  The second bank to join was not found."); return; }
+    MY_ERR("io_join:  Arg 1:  The second bank to join was not found."); return;
+  }
 
   // Reallocate the bank
   t_int32 res_cnt_1 = bank1->reson_cnt;
@@ -1231,7 +1280,8 @@ void io_join(t_modal *x, t_symbol *sym, t_int32 argc, t_atom *argv) {
 
   // Copy the resonators into the second segment of the resonator array
   for (t_int32 res = 0; res < bank2->reson_cnt; res ++) {
-    reson_copy(x, bank1, bank1->reson_arr + res_cnt_1 + res, bank2->reson_arr + res); }
+    reson_copy(x, bank1, bank1->reson_arr + res_cnt_1 + res, bank2->reson_arr + res);
+  }
 
   bank_update(x, bank1);
   bank_sort(x, bank1);
@@ -1246,19 +1296,19 @@ void io_join(t_modal *x, t_symbol *sym, t_int32 argc, t_atom *argv) {
 
 // ====  METHOD: IO_RENAME  ====
 
-void io_rename(t_modal *x, t_symbol *sym, t_int32 argc, t_atom *argv) {
+void io_rename(t_modal* x, t_symbol* sym, t_int32 argc, t_atom* argv) {
 
   TRACE("io_rename");
 
   // Pointers to structures that need cleanup
-  t_dictionary *dict = NULL;
+  t_dictionary* dict = NULL;
 
   // Get the name of the bank to look for in the dictionary
-  t_symbol *bank_sym = atom_getsym(argv);
+  t_symbol* bank_sym = atom_getsym(argv);
   if (bank_sym == sym_empty) { MY_ERR("%s:  Arg 0:  A bank name to look for in the dictionary is required.", sym->s_name); goto MODAL_RENAME_END; }
 
   // Get the name to rename the saved bank under
-  t_symbol *bank_sym_new = atom_getsym(argv + 1);
+  t_symbol* bank_sym_new = atom_getsym(argv + 1);
   if (bank_sym_new == sym_empty) { MY_ERR("%s:  Arg 1:  A new name for the bank is required.", sym->s_name); goto MODAL_RENAME_END; }
 
   // Test if the main dictionary is found
@@ -1266,27 +1316,29 @@ void io_rename(t_modal *x, t_symbol *sym, t_int32 argc, t_atom *argv) {
   if (!dict) { MY_ERR("%s:  There is no main dictionary %s.", sym->s_name, x->dict_sym->s_name); goto MODAL_RENAME_END; }
 
   // Open the subdictionary with all the banks
-  t_dictionary *dict_all_banks = NULL;
-  dictionary_getdictionary(dict, gensym("banks"), (t_object **)&dict_all_banks);
+  t_dictionary* dict_all_banks = NULL;
+  dictionary_getdictionary(dict, gensym("banks"), (t_object**)&dict_all_banks);
   if (dict_all_banks == NULL) {
-    MY_ERR("%s:  The main dictionary %s does not have a subdictionary for the banks.", sym->s_name, x->dict_sym->s_name); goto MODAL_RENAME_END; }
+    MY_ERR("%s:  The main dictionary %s does not have a subdictionary for the banks.", sym->s_name, x->dict_sym->s_name); goto MODAL_RENAME_END;
+  }
 
   // Look for the specific bank we want to rename in the dictionary
-  t_dictionary *dict_bank = NULL;
-  dictionary_getdictionary(dict_all_banks, bank_sym, (t_object **)&dict_bank);
+  t_dictionary* dict_bank = NULL;
+  dictionary_getdictionary(dict_all_banks, bank_sym, (t_object**)&dict_bank);
   if (dict_bank == NULL) {
-    MY_ERR("%s:  The bank %s was not found in the main dictionary %s.", sym->s_name, bank_sym->s_name, x->dict_sym->s_name); goto MODAL_RENAME_END; }
+    MY_ERR("%s:  The bank %s was not found in the main dictionary %s.", sym->s_name, bank_sym->s_name, x->dict_sym->s_name); goto MODAL_RENAME_END;
+  }
 
   // Chuck the entry and reappend it under a different key
   dictionary_chuckentry(dict_all_banks, bank_sym);
-  dictionary_appenddictionary(dict_all_banks, bank_sym_new, (t_object *)dict_bank);
+  dictionary_appenddictionary(dict_all_banks, bank_sym_new, (t_object*)dict_bank);
 
   // Send out a message to indicate completion of rename
   t_atom mess_arr[2];
   atom_setsym(mess_arr, bank_sym);
   atom_setsym(mess_arr + 1, bank_sym_new);
   outlet_anything(x->outl_mess, gensym("rename"), 2, mess_arr);
-  
+
   // Release the main dictionary
   MODAL_RENAME_END:
   if (dict)   { dictobj_release(dict); }
@@ -1295,15 +1347,15 @@ void io_rename(t_modal *x, t_symbol *sym, t_int32 argc, t_atom *argv) {
 
 // ====  METHOD: IO_DELETE  ====
 
-void io_delete(t_modal *x, t_symbol *sym, t_int32 argc, t_atom *argv) {
+void io_delete(t_modal* x, t_symbol* sym, t_int32 argc, t_atom* argv) {
 
   TRACE("io_delete");
 
   // Pointers to structures that need cleanup
-  t_dictionary *dict = NULL;
+  t_dictionary* dict = NULL;
 
   // Get the name of the bank to look for in the dictionary
-  t_symbol *bank_sym = atom_getsym(argv);
+  t_symbol* bank_sym = atom_getsym(argv);
   if (bank_sym == sym_empty) { MY_ERR("%s:  Arg 0:  A bank name to look for in the dictionary is required.", sym->s_name); goto MODAL_DELETE_END; }
 
   // Test if the main dictionary is found
@@ -1311,16 +1363,18 @@ void io_delete(t_modal *x, t_symbol *sym, t_int32 argc, t_atom *argv) {
   if (!dict) { MY_ERR("%s:  There is no main dictionary %s.", sym->s_name, x->dict_sym->s_name); goto MODAL_DELETE_END; }
 
   // Open the subdictionary with all the banks
-  t_dictionary *dict_all_banks = NULL;
-  dictionary_getdictionary(dict, gensym("banks"), (t_object **)&dict_all_banks);
+  t_dictionary* dict_all_banks = NULL;
+  dictionary_getdictionary(dict, gensym("banks"), (t_object**)&dict_all_banks);
   if (dict_all_banks == NULL) {
-    MY_ERR("%s:  The main dictionary %s does not have a subdictionary for the banks.", sym->s_name, x->dict_sym->s_name); goto MODAL_DELETE_END; }
+    MY_ERR("%s:  The main dictionary %s does not have a subdictionary for the banks.", sym->s_name, x->dict_sym->s_name); goto MODAL_DELETE_END;
+  }
 
   // Look for the specific bank we want to delete in the dictionary
-  t_dictionary *dict_bank = NULL;
-  dictionary_getdictionary(dict_all_banks, bank_sym, (t_object **)&dict_bank);
+  t_dictionary* dict_bank = NULL;
+  dictionary_getdictionary(dict_all_banks, bank_sym, (t_object**)&dict_bank);
   if (dict_bank == NULL) {
-    MY_ERR("%s:  The bank %s was not found in the main dictionary %s.", sym->s_name, bank_sym->s_name, x->dict_sym->s_name); goto MODAL_DELETE_END; }
+    MY_ERR("%s:  The bank %s was not found in the main dictionary %s.", sym->s_name, bank_sym->s_name, x->dict_sym->s_name); goto MODAL_DELETE_END;
+  }
 
   // Chuck the entry and reappend it under a different key
   dictionary_deleteentry(dict_all_banks, bank_sym);
@@ -1329,7 +1383,7 @@ void io_delete(t_modal *x, t_symbol *sym, t_int32 argc, t_atom *argv) {
   t_atom mess_arr[1];
   atom_setsym(mess_arr, bank_sym);
   outlet_anything(x->outl_mess, gensym("delete"), 1, mess_arr);
-  
+
   // Release the main dictionary
   MODAL_DELETE_END:
   if (dict)   { dictobj_release(dict); }
@@ -1341,7 +1395,7 @@ void io_delete(t_modal *x, t_symbol *sym, t_int32 argc, t_atom *argv) {
 // Arguments:  int/sym
 //   Arg 0:  The bank to clear information from (int/sym):  index / name
 
-void io_clear(t_modal *x, t_symbol *sym, t_int32 argc, t_atom *argv) {
+void io_clear(t_modal* x, t_symbol* sym, t_int32 argc, t_atom* argv) {
 
   TRACE("io_clear");
 
@@ -1349,7 +1403,7 @@ void io_clear(t_modal *x, t_symbol *sym, t_int32 argc, t_atom *argv) {
   if (argc == 1) {
 
     // The first argument should reference a bank of resonator
-    t_bank *bank = bank_find(x, argv, sym);
+    t_bank* bank = bank_find(x, argv, sym);
     if (bank != NULL) {
 
       // Free the existing bank and create a new one
@@ -1363,7 +1417,9 @@ void io_clear(t_modal *x, t_symbol *sym, t_int32 argc, t_atom *argv) {
       atom_setlong(mess_arr + 2, bank->reson_cnt);
       outlet_anything(x->outl_mess, gensym("clear"), 3, mess_arr);
 
-      return; } }
+      return;
+    }
+  }
 
   // Otherwise the arguments are invalid
   MY_ERR("%s:  Invalid arguments. The method expects:  int/sym", sym->s_name);
@@ -1378,12 +1434,12 @@ void io_clear(t_modal *x, t_symbol *sym, t_int32 argc, t_atom *argv) {
 // Output:  a message
 //   Mess 1:  "show1", index, name, number of modes
 
-void modal_info(t_modal *x, t_symbol *sym, t_int32 argc, t_atom *argv) {
+void modal_info(t_modal* x, t_symbol* sym, t_int32 argc, t_atom* argv) {
 
   TRACE("modal_info");
 
   // The first argument should reference a bank of resonator
-  t_bank *bank;
+  t_bank* bank;
   if ((argc >= 1) && ((bank = bank_find(x, argv, sym)) != NULL)) {
 
     x->bank_cur = bank;
@@ -1402,7 +1458,8 @@ void modal_info(t_modal *x, t_symbol *sym, t_int32 argc, t_atom *argv) {
 
     outlet_anything(x->outl_mess, gensym("info"), 8, mess_arr);
 
-    return; }
+    return;
+  }
 
   // Otherwise the arguments are invalid
   MY_ERR("%s:  Invalid arguments. The method expects:  int/sym (sym)", sym->s_name);
@@ -1418,39 +1475,42 @@ void modal_info(t_modal *x, t_symbol *sym, t_int32 argc, t_atom *argv) {
 // Output:  a message
 //   "param", amplitudes, frequencies, decays (3*n)
 
-void modal_param(t_modal *x, t_symbol *sym, t_int32 argc, t_atom *argv) {
+void modal_param(t_modal* x, t_symbol* sym, t_int32 argc, t_atom* argv) {
 
   TRACE("modal_param");
-  
-  t_atom *mess_arr = NULL;
+
+  t_atom* mess_arr = NULL;
 
   // The first argument should reference a bank of resonator
-  t_bank *bank;
+  t_bank* bank;
   if ((argc >= 1) && ((bank = bank_find(x, argv, sym)) != NULL)) {
 
-      mess_arr = (t_atom *)sysmem_newptr(sizeof(t_atom) * 4 * bank->reson_cnt);
+      mess_arr = (t_atom*)sysmem_newptr(sizeof(t_atom) * 4 * bank->reson_cnt);
       if (mess_arr == NULL) {
-        MY_ERR("modal_param:  Failed to allocate an array of messages."); goto MODAL_PARAM_END; }
+        MY_ERR("modal_param:  Failed to allocate an array of messages."); goto MODAL_PARAM_END;
+      }
 
     // The second argument should be empty...
     if (argc == 1) {
 
-      t_atom *atom = mess_arr;
+      t_atom* atom = mess_arr;
       for (int i = 0; i < bank->reson_cnt; i++) {
 
         atom_setlong(atom++, i);
         atom_setfloat(atom++, (bank->reson_arr + i)->a0);
         atom_setfloat(atom++, (bank->reson_arr + i)->freq);
-        atom_setfloat(atom++, (bank->reson_arr + i)->decay); }
+        atom_setfloat(atom++, (bank->reson_arr + i)->decay);
+      }
 
       outlet_anything(x->outl_mess, gensym("param"), 4 * bank->reson_cnt, mess_arr);
-      goto MODAL_PARAM_END;  }
+      goto MODAL_PARAM_END;
+    }
 
     // Or a symbol to indicate the type of sorting
     else if (argc == 2) {
 
-      t_symbol *sort = atom_getsym(argv + 1);
-      t_int32 *sort_arr = NULL;
+      t_symbol* sort = atom_getsym(argv + 1);
+      t_int32* sort_arr = NULL;
 
       if      (sort == sym_freq)  { sort_arr = bank->sort_freq; }
       else if (sort == sym_decay) { sort_arr = bank->sort_decay; }
@@ -1458,16 +1518,20 @@ void modal_param(t_modal *x, t_symbol *sym, t_int32 argc, t_atom *argv) {
 
       if (sort_arr != NULL) {
 
-        t_atom *atom = mess_arr;
+        t_atom* atom = mess_arr;
         for (int i = 0; i < bank->reson_cnt; i++) {
 
           atom_setlong(atom++, i);
           atom_setfloat(atom++, (bank->reson_arr + sort_arr[i])->a0);
           atom_setfloat(atom++, (bank->reson_arr + sort_arr[i])->freq);
-          atom_setfloat(atom++, (bank->reson_arr + sort_arr[i])->decay); }
-    
+          atom_setfloat(atom++, (bank->reson_arr + sort_arr[i])->decay);
+        }
+
       outlet_anything(x->outl_mess, gensym("param"), 4 * bank->reson_cnt, mess_arr);
-      goto MODAL_PARAM_END; } } }
+      goto MODAL_PARAM_END;
+    }
+  }
+}
 
   // Otherwise the arguments are invalid
   MY_ERR("%s:  Invalid arguments. The method expects:  int/sym (sym)", sym->s_name);
@@ -1484,15 +1548,15 @@ void modal_param(t_modal *x, t_symbol *sym, t_int32 argc, t_atom *argv) {
 // Arguments:  int/sym
 //   Arg 0:  The bank to send information from (int/sym):  index / name
 
-void modal_post(t_modal *x, t_symbol *sym, t_int32 argc, t_atom *argv) {
+void modal_post(t_modal* x, t_symbol* sym, t_int32 argc, t_atom* argv) {
 
   TRACE("modal_post");
-  
+
   // The number of arguments should be one
   if (argc == 1) {
 
     // The first argument should reference a bank of resonator
-    t_bank *bank = bank_find(x, argv, sym);
+    t_bank* bank = bank_find(x, argv, sym);
     if (bank != NULL) {
 
       // Post all the information
@@ -1503,9 +1567,12 @@ void modal_post(t_modal *x, t_symbol *sym, t_int32 argc, t_atom *argv) {
         POST("  Res %i:  Ampl = %.2f  Freq = %.0f  Decay = %.2f  B1 = %.2f  B2 = %.2f  Y(n-1) = %.2f  Y(n-2) = %.2f",
           i, (bank->reson_arr + i)->a0, (bank->reson_arr + i)->freq, (bank->reson_arr + i)->decay,
           (bank->reson_arr + i)->b1, (bank->reson_arr + i)->b2,
-          (bank->reson_arr + i)->y_m1, (bank->reson_arr + i)->y_m2); }
+          (bank->reson_arr + i)->y_m1, (bank->reson_arr + i)->y_m2);
+        }
 
-      return; } }
+      return;
+    }
+  }
 
   // Otherwise the arguments are invalid
   MY_ERR("%s:  Invalid arguments. The method expects:  int/sym", sym->s_name);
@@ -1518,7 +1585,7 @@ void modal_post(t_modal *x, t_symbol *sym, t_int32 argc, t_atom *argv) {
 // Arguments:  int/sym
 //   Arg 0:  The bank to flush information from (int/sym):  index / name
 
-void modal_flush(t_modal *x, t_symbol *sym, t_int32 argc, t_atom *argv) {
+void modal_flush(t_modal* x, t_symbol* sym, t_int32 argc, t_atom* argv) {
 
   TRACE("modal_flush");
 
@@ -1526,15 +1593,18 @@ void modal_flush(t_modal *x, t_symbol *sym, t_int32 argc, t_atom *argv) {
   if (argc == 1) {
 
     // The first argument should reference a bank of resonator
-    t_bank *bank = bank_find(x, argv, sym);
+    t_bank* bank = bank_find(x, argv, sym);
     if (bank != NULL) {
 
       // Reset the (n-1) and (n-2) values of the filters to zero
       for (int i = 0; i < bank->reson_cnt; i++) {
         (bank->reson_arr + i)->y_m1 = 0.0;
-        (bank->reson_arr + i)->y_m2 = 0.0; }
-      
-      return; } }
+        (bank->reson_arr + i)->y_m2 = 0.0;
+      }
+
+      return;
+    }
+  }
 
   // Otherwise the arguments are invalid
   MY_ERR("%s:  Invalid arguments. The method expects:  int/sym", sym->s_name);
@@ -1547,7 +1617,7 @@ void modal_flush(t_modal *x, t_symbol *sym, t_int32 argc, t_atom *argv) {
 // Arguments:  Float
 //   Arg 0:  Float - The master gain of the whole object
 
-void modal_master(t_modal *x, t_double gain) {
+void modal_master(t_modal* x, t_double gain) {
 
   TRACE("modal_master");
 
@@ -1560,7 +1630,7 @@ void modal_master(t_modal *x, t_double gain) {
 //   Arg 0:  Int - The index of the bank
 //   Arg 1:  Float - The gain of the resonator bank
 
-void modal_gain(t_modal *x, t_symbol *sym, t_int32 argc, t_atom *argv) {
+void modal_gain(t_modal* x, t_symbol* sym, t_int32 argc, t_atom* argv) {
 
   TRACE("modal_gain");
 
@@ -1575,12 +1645,12 @@ void modal_gain(t_modal *x, t_symbol *sym, t_int32 argc, t_atom *argv) {
 //   Arg 0:  Int - The index of the bank
 //   Arg 1:  Int - To set the bank on or off
 
-void modal_is_on(t_modal *x, t_symbol *sym, t_int32 argc, t_atom *argv) {
+void modal_is_on(t_modal* x, t_symbol* sym, t_int32 argc, t_atom* argv) {
 
   TRACE("modal_is_on");
 
   // The first argument should reference a bank of resonator
-  t_bank *bank = bank_find(x, argv, sym);
+  t_bank* bank = bank_find(x, argv, sym);
   if (bank == NULL) { return; }
 
   t_bool is_on = (t_bool)atom_getlong(argv + 1);
@@ -1593,20 +1663,21 @@ void modal_is_on(t_modal *x, t_symbol *sym, t_int32 argc, t_atom *argv) {
 //   Arg 0:  Int - The index of the bank
 //   Arg 1:  Float - The amplitude multiplier of the resonator bank
 
-void modal_ampl_mult(t_modal *x, t_symbol *sym, t_int32 argc, t_atom *argv) {
+void modal_ampl_mult(t_modal* x, t_symbol* sym, t_int32 argc, t_atom* argv) {
 
   TRACE("modal_ampl_mult");
 
   // The first argument should reference a bank of resonator
-  t_bank *bank = bank_find(x, argv, sym);
+  t_bank* bank = bank_find(x, argv, sym);
   if (bank == NULL) { return; }
 
   bank->ampl_mult = atom_getfloat(argv + 1);
 
-  /*t_resonator *reson = bank->reson_arr + bank->reson_cnt;
+  /*t_resonator* reson = bank->reson_arr + bank->reson_cnt;
 
   while (reson-- != bank->reson_arr) {
-    reson->a0 = reson->ampl_ref * bank->ampl_mult; }*/
+    reson->a0 = reson->ampl_ref * bank->ampl_mult;
+  } */
 }
 
 // ====  METHOD: MODAL_FREQ_MULT  ====
@@ -1615,12 +1686,12 @@ void modal_ampl_mult(t_modal *x, t_symbol *sym, t_int32 argc, t_atom *argv) {
 //   Arg 0:  Int - The index of the bank
 //   Arg 1:  Float - The frequency multiplier of the resonator bank
 
-void modal_freq_shift(t_modal *x, t_symbol *sym, t_int32 argc, t_atom *argv) {
+void modal_freq_shift(t_modal* x, t_symbol* sym, t_int32 argc, t_atom* argv) {
 
   TRACE("modal_freq_shift");
 
   // The first argument should reference a bank of resonator
-  t_bank *bank = bank_find(x, argv, sym);
+  t_bank* bank = bank_find(x, argv, sym);
   if (bank == NULL) { return; }
 
   bank->freq_shift = atom_getfloat(argv + 1);
@@ -1635,12 +1706,12 @@ void modal_freq_shift(t_modal *x, t_symbol *sym, t_int32 argc, t_atom *argv) {
 //   Arg 0:  Int - The index of the bank
 //   Arg 1:  Float - The decay multiplier of the resonator bank
 
-void modal_decay_mult(t_modal *x, t_symbol *sym, t_int32 argc, t_atom *argv) {
+void modal_decay_mult(t_modal* x, t_symbol* sym, t_int32 argc, t_atom* argv) {
 
   TRACE("modal_decay_mult");
 
   // The first argument should reference a bank of resonator
-  t_bank *bank = bank_find(x, argv, sym);
+  t_bank* bank = bank_find(x, argv, sym);
   if (bank == NULL) { return; }
 
   bank->decay_mult = atom_getfloat(argv + 1);
@@ -1650,10 +1721,10 @@ void modal_decay_mult(t_modal *x, t_symbol *sym, t_int32 argc, t_atom *argv) {
 
 // ====  METHOD: MODAL_GET_AMPL_RNG  ====
 
-void modal_get_ampl_rng(t_modal *x, t_symbol *sym, t_int32 argc, t_atom *argv) {
+void modal_get_ampl_rng(t_modal* x, t_symbol* sym, t_int32 argc, t_atom* argv) {
 
   // The first argument should reference a bank of resonator
-  t_bank *bank = bank_find(x, argv, sym);
+  t_bank* bank = bank_find(x, argv, sym);
   if (bank == NULL) { return; }
 
   t_atom mess_arr[2];
@@ -1664,10 +1735,10 @@ void modal_get_ampl_rng(t_modal *x, t_symbol *sym, t_int32 argc, t_atom *argv) {
 
 // ====  METHOD: MODAL_GET_FREQ_RNG  ====
 
-void modal_get_freq_rng(t_modal *x, t_symbol *sym, t_int32 argc, t_atom *argv) {
+void modal_get_freq_rng(t_modal* x, t_symbol* sym, t_int32 argc, t_atom* argv) {
 
   // The first argument should reference a bank of resonator
-  t_bank *bank = bank_find(x, argv, sym);
+  t_bank* bank = bank_find(x, argv, sym);
   if (bank == NULL) { return; }
 
   t_atom mess_arr[2];
@@ -1678,10 +1749,10 @@ void modal_get_freq_rng(t_modal *x, t_symbol *sym, t_int32 argc, t_atom *argv) {
 
 // ====  METHOD: MODAL_GET_DECAY_RNG  ====
 
-void modal_get_decay_rng(t_modal *x, t_symbol *sym, t_int32 argc, t_atom *argv) {
+void modal_get_decay_rng(t_modal* x, t_symbol* sym, t_int32 argc, t_atom* argv) {
 
   // The first argument should reference a bank of resonator
-  t_bank *bank = bank_find(x, argv, sym);
+  t_bank* bank = bank_find(x, argv, sym);
   if (bank == NULL) { return; }
 
   t_atom mess_arr[2];
@@ -1692,17 +1763,19 @@ void modal_get_decay_rng(t_modal *x, t_symbol *sym, t_int32 argc, t_atom *argv) 
 
 // ====  METHOD: MODAL_SEL_ALL  ====
 
-void modal_sel_all(t_modal *x, t_symbol *sym, t_int32 argc, t_atom *argv) {
+void modal_sel_all(t_modal* x, t_symbol* sym, t_int32 argc, t_atom* argv) {
 
   // The number of arguments should be one
   if (argc == 1) {
 
     // The first argument should reference a bank of resonator
-    t_bank *bank = bank_find(x, argv, sym);
+    t_bank* bank = bank_find(x, argv, sym);
     if (bank != NULL) {
 
-      for (t_int32 i = 0; i < bank->reson_cnt; i++) { ; }
-      return; } }
+      for (t_int32 i = 0; i < bank->reson_cnt; i++) {; }
+      return;
+    }
+  }
 
   // Otherwise the arguments are invalid
   MY_ERR("%s:  Invalid arguments. The method expects:  int/sym", sym->s_name);
@@ -1712,7 +1785,7 @@ void modal_sel_all(t_modal *x, t_symbol *sym, t_int32 argc, t_atom *argv) {
 
 // ====  METHOD: MODAL_SEL_INIT  ====
 
-__inline void modal_sel_init(t_modal *x, t_bank *bank) {
+__inline void modal_sel_init(t_modal* x, t_bank* bank) {
 
   bank->sel_ampl_min = bank->ampl_max;
   bank->sel_ampl_max = bank->ampl_min;
@@ -1724,7 +1797,7 @@ __inline void modal_sel_init(t_modal *x, t_bank *bank) {
 
 // ====  METHOD: MODAL_SEL_COMPARE  ====
 
-__inline void modal_sel_compare(t_modal *x, t_bank *bank, t_resonator *reson) {
+__inline void modal_sel_compare(t_modal* x, t_bank* bank, t_resonator* reson) {
 
   bank->sel_ampl_min = MIN(bank->sel_ampl_min, reson->a0);
   bank->sel_ampl_max = MAX(bank->sel_ampl_max, reson->a0);
@@ -1736,7 +1809,7 @@ __inline void modal_sel_compare(t_modal *x, t_bank *bank, t_resonator *reson) {
 
 // ====  METHOD: MODAL_SEL_OUT  ====
 
-__inline void modal_sel_out(t_modal *x, t_bank *bank, t_int32 cnt) {
+__inline void modal_sel_out(t_modal* x, t_bank* bank, t_int32 cnt) {
 
   t_atom mess_arr[7];
 
@@ -1749,20 +1822,21 @@ __inline void modal_sel_out(t_modal *x, t_bank *bank, t_int32 cnt) {
     atom_setfloat(mess_arr + 4, bank->sel_freq_max);
     atom_setfloat(mess_arr + 5, bank->sel_decay_min);
     atom_setfloat(mess_arr + 6, bank->sel_decay_max);
-    outlet_anything(x->outl_mess, gensym("select"), 7, mess_arr); }
+    outlet_anything(x->outl_mess, gensym("select"), 7, mess_arr);
+  }
 
   else { outlet_anything(x->outl_mess, gensym("select"), 1, mess_arr); }
 }
 
 // ====  METHOD: MODAL_SEL_AMPL_IND  ====
 
-void modal_sel_ampl_ind(t_modal *x, t_symbol *sym, t_int32 argc, t_atom *argv) {
+void modal_sel_ampl_ind(t_modal* x, t_symbol* sym, t_int32 argc, t_atom* argv) {
 
   // The number of arguments should be three
   if (argc == 3) {
 
     // The first argument should reference a bank of resonator
-    t_bank *bank = bank_find(x, argv, sym);
+    t_bank* bank = bank_find(x, argv, sym);
     if (bank != NULL) {
 
       t_int32 min = (t_int32)atom_getlong(argv + 1);
@@ -1770,17 +1844,20 @@ void modal_sel_ampl_ind(t_modal *x, t_symbol *sym, t_int32 argc, t_atom *argv) {
 
       modal_sel_init(x, bank);
 
-      for (t_int32 i = 0; i < min; i++)                { ; }
+      for (t_int32 i = 0; i < min; i++)                {; }
       for (t_int32 i = max; i < bank->reson_cnt; i++) {  ; }
 
       for (t_int32 i = min; i < max; i++) {
-        t_resonator *reson = bank->reson_arr + bank->sort_ampl[i];
+        t_resonator* reson = bank->reson_arr + bank->sort_ampl[i];
         ;
-        modal_sel_compare(x, bank, reson); }
+        modal_sel_compare(x, bank, reson);
+      }
 
       modal_sel_out(x, bank, max - min);
-      
-      return; } }
+
+      return;
+    }
+  }
 
   // Otherwise the arguments are invalid
   MY_ERR("%s:  Invalid arguments. The method expects:  int/sym int int", sym->s_name);
@@ -1792,20 +1869,20 @@ void modal_sel_ampl_ind(t_modal *x, t_symbol *sym, t_int32 argc, t_atom *argv) {
 
 // ====  METHOD: MODAL_SEL_AMPL_RNG  ====
 
-void modal_sel_ampl_rng(t_modal *x, t_symbol *sym, t_int32 argc, t_atom *argv) {
+void modal_sel_ampl_rng(t_modal* x, t_symbol* sym, t_int32 argc, t_atom* argv) {
 
   ;
 }
 
 // ====  METHOD: MODAL_SEL_FREQ_IND  ====
 
-void modal_sel_freq_ind(t_modal *x, t_symbol *sym, t_int32 argc, t_atom *argv) {
+void modal_sel_freq_ind(t_modal* x, t_symbol* sym, t_int32 argc, t_atom* argv) {
 
   // The number of arguments should be three
   if (argc == 3) {
 
     // The first argument should reference a bank of resonator
-    t_bank *bank = bank_find(x, argv, sym);
+    t_bank* bank = bank_find(x, argv, sym);
     if (bank != NULL) {
 
       t_int32 min = (t_int32)atom_getlong(argv + 1);
@@ -1813,17 +1890,20 @@ void modal_sel_freq_ind(t_modal *x, t_symbol *sym, t_int32 argc, t_atom *argv) {
 
       modal_sel_init(x, bank);
 
-      for (t_int32 i = 0; i < min; i++)                { ; }
-      for (t_int32 i = max; i < bank->reson_cnt; i++) { ; }
+      for (t_int32 i = 0; i < min; i++)                {; }
+      for (t_int32 i = max; i < bank->reson_cnt; i++) {; }
 
       for (t_int32 i = min; i < max; i++) {
-        t_resonator *reson = bank->reson_arr + bank->sort_freq[i];
+        t_resonator* reson = bank->reson_arr + bank->sort_freq[i];
         ;
-        modal_sel_compare(x, bank, reson); }
+        modal_sel_compare(x, bank, reson);
+      }
 
       modal_sel_out(x, bank, max - min);
 
-      return; } }
+      return;
+    }
+  }
 
   // Otherwise the arguments are invalid
   MY_ERR("%s:  Invalid arguments. The method expects:  int/sym int int", sym->s_name);
@@ -1835,82 +1915,88 @@ void modal_sel_freq_ind(t_modal *x, t_symbol *sym, t_int32 argc, t_atom *argv) {
 
 // ====  METHOD: MODAL_SEL_FREQ_RNG  ====
 
-void modal_sel_freq_rng(t_modal *x, t_symbol *sym, t_int32 argc, t_atom *argv) {
+void modal_sel_freq_rng(t_modal* x, t_symbol* sym, t_int32 argc, t_atom* argv) {
 
   // The number of arguments should be three
   if (argc == 3) {
 
     // The first argument should reference a bank of resonator
-    t_bank *bank = bank_find(x, argv, sym);
+    t_bank* bank = bank_find(x, argv, sym);
     if (bank != NULL) {
 
       t_double min = (t_int32)atom_getfloat(argv + 1);
       t_double max = (t_int32)atom_getfloat(argv + 2);
-  
+
       modal_sel_init(x, bank);
 
       t_int32 i = 0, cnt = 0;
-      while (((bank->reson_arr + bank->sort_freq[i])->freq < min) && (i++ < bank->reson_cnt)) { ; }
+      while (((bank->reson_arr + bank->sort_freq[i])->freq < min) && (i++ < bank->reson_cnt)) {; }
 
       while (((bank->reson_arr + bank->sort_freq[i])->freq < max) && (i++ < bank->reson_cnt)) {
-        t_resonator *reson = bank->reson_arr + bank->sort_freq[i];
+        t_resonator* reson = bank->reson_arr + bank->sort_freq[i];
         ;
         cnt++;
-        modal_sel_compare(x, bank, reson); }
-      
-      while (i++ < bank->reson_cnt) { ; }
+        modal_sel_compare(x, bank, reson);
+      }
+
+      while (i++ < bank->reson_cnt) {; }
 
       modal_sel_out(x, bank, cnt);
 
-      return; } }
+      return;
+    }
+  }
 
   // Otherwise the arguments are invalid
   MY_ERR("%s:  Invalid arguments. The method expects:  int/sym float float", sym->s_name);
   MY_ERR2("  Arg 0:  The bank for which to select a range of resonators (int/sym):  index / name");
   MY_ERR2("  Arg 1:  The lower value of the range ordered by frequency:  float");
   MY_ERR2("  Arg 2:  The upper value of the range ordered by frequency:  float");
-  return;    
+  return;
 }
 
 // ====  METHOD: MODAL_SEL_DECAY_IND  ====
 
-void modal_sel_decay_ind(t_modal *x, t_symbol *sym, t_int32 argc, t_atom *argv) {
+void modal_sel_decay_ind(t_modal* x, t_symbol* sym, t_int32 argc, t_atom* argv) {
 
   // The number of arguments should be three
   if (argc == 3) {
 
     // The first argument should reference a bank of resonator
-    t_bank *bank = bank_find(x, argv, sym);
+    t_bank* bank = bank_find(x, argv, sym);
     if (bank != NULL) {
 
       t_int32 min = (t_int32)atom_getlong(argv + 1);
       t_int32 max = (t_int32)atom_getlong(argv + 2);
-  
+
       modal_sel_init(x, bank);
 
-      for (t_int32 i = 0; i < min; i++)                { ; }
-      for (t_int32 i = max; i < bank->reson_cnt; i++)  { ; }
+      for (t_int32 i = 0; i < min; i++)                {; }
+      for (t_int32 i = max; i < bank->reson_cnt; i++)  {; }
 
       for (t_int32 i = min; i < max; i++) {
-        t_resonator *reson = bank->reson_arr + bank->sort_decay[i];
+        t_resonator* reson = bank->reson_arr + bank->sort_decay[i];
         ;
-        modal_sel_compare(x, bank, reson); }
+        modal_sel_compare(x, bank, reson);
+      }
 
       modal_sel_out(x, bank, max - min);
 
-      return; } }
+      return;
+    }
+  }
 
   // Otherwise the arguments are invalid
   MY_ERR("%s:  Invalid arguments. The method expects:  int/sym int int", sym->s_name);
   MY_ERR2("  Arg 0:  The bank for which to select a range of resonators (int/sym):  index / name");
   MY_ERR2("  Arg 1:  The lower index of the range ordered by decay:  int");
   MY_ERR2("  Arg 2:  The upper index of the range ordered by decay:  int");
-  return;    
+  return;
 }
 
 // ====  METHOD: MODAL_SEL_DECAY_RNG  ====
 
-void modal_sel_decay_rng(t_modal *x, t_symbol *sym, t_int32 argc, t_atom *argv) {
+void modal_sel_decay_rng(t_modal* x, t_symbol* sym, t_int32 argc, t_atom* argv) {
 
   ;
 }
@@ -1919,7 +2005,7 @@ void modal_sel_decay_rng(t_modal *x, t_symbol *sym, t_int32 argc, t_atom *argv) 
 
 // ====  METHOD: RESON_NEW  ====
 
-void reson_new(t_modal *x, t_bank *bank, t_resonator *reson) {
+void reson_new(t_modal* x, t_bank* bank, t_resonator* reson) {
 
   TRACE("reson_new");
 
@@ -1946,7 +2032,8 @@ void reson_new(t_modal *x, t_bank *bank, t_resonator *reson) {
 
   for (t_int32 t = 0; t < 4; t++) {
     reson->times[t]      = random_int(bank->times[2 * t], bank->times[2 * t + 1]);
-    reson->times[t + 4] = random_int(bank->times[2 * t], bank->times[2 * t + 1]); }
+    reson->times[t + 4] = random_int(bank->times[2 * t], bank->times[2 * t + 1]);
+  }
 
   reson->diff_type = MODE_DIFF_ONE_RR;
   for (t_int32 ch = 0; ch < 8; ch++) { reson->diff_mult[ch]  = 0.0; }
@@ -1960,7 +2047,7 @@ void reson_new(t_modal *x, t_bank *bank, t_resonator *reson) {
 
 // ====  METHOD: RESON_FREE  ====
 
-void reson_free(t_modal *x, t_resonator *reson) {
+void reson_free(t_modal* x, t_resonator* reson) {
 
   TRACE("reson_free");
 
@@ -1969,7 +2056,7 @@ void reson_free(t_modal *x, t_resonator *reson) {
 
 // ====  METHOD: RESON_COPY  ====
 
-void reson_copy(t_modal *x, t_bank *bank, t_resonator *reson, t_resonator *reson_src) {
+void reson_copy(t_modal* x, t_bank* bank, t_resonator* reson, t_resonator* reson_src) {
 
   TRACE("reson_copy");
 
@@ -1982,7 +2069,7 @@ void reson_copy(t_modal *x, t_bank *bank, t_resonator *reson, t_resonator *reson
 
 // ====  METHOD: RESON_UPDATE  ====
 
-void reson_update(t_modal *x, t_bank *bank, t_resonator *reson) {
+void reson_update(t_modal* x, t_bank* bank, t_resonator* reson) {
 
   reson->a0     = reson->ampl_ref  * bank->ampl_mult;
   reson->freq  = reson->freq_ref  * bank->freq_mult;
@@ -1998,7 +2085,7 @@ void reson_update(t_modal *x, t_bank *bank, t_resonator *reson) {
 // ====  METHOD: BANK_NEW  ====
 // Allocate all the arrays for a bank of resonators.
 
-t_int32 bank_new(t_modal *x, t_bank *bank, t_int32 nb) {
+t_int32 bank_new(t_modal* x, t_bank* bank, t_int32 nb) {
 
   TRACE("bank_new");
 
@@ -2011,10 +2098,12 @@ t_int32 bank_new(t_modal *x, t_bank *bank, t_int32 nb) {
   // Check the validity of the number of resonators
   if (nb < 1) {
     MY_ERR("bank_new:  Invalid number of resonators: %i. Should be at least 1.", nb);
-    return ERR_ALLOC; }
+    return ERR_ALLOC;
+  }
   if (nb > x->reson_max) {
     MY_ERR("bank_new:  Invalid number of resonators: %i. Should be at most %i.", x->reson_max, nb);
-    return ERR_ALLOC; }
+    return ERR_ALLOC;
+  }
 
   // Variable initialization
   bank->is_on      = false;
@@ -2032,20 +2121,20 @@ t_int32 bank_new(t_modal *x, t_bank *bank, t_int32 nb) {
   _mode_new(x, bank);
 
   // Memory allocation for the resonators
-  bank->reson_arr  = (t_resonator *)sysmem_newptr(sizeof(t_resonator) * bank->reson_cnt);
+  bank->reson_arr  = (t_resonator*)sysmem_newptr(sizeof(t_resonator) * bank->reson_cnt);
   if (bank->reson_arr == NULL) { MY_ERR("bank_new:  Failed to allocate reson_arr."); return ERR_ALLOC; }
 
   // Resonator initialization
   for (int i = 0; i < bank->reson_cnt; i++) { reson_new(x, bank, bank->reson_arr + i); }
 
   // Memory allocation for sorting
-  bank->sort_ampl   = (t_int32 *)sysmem_newptr(sizeof(t_int32) * bank->reson_cnt);
+  bank->sort_ampl   = (t_int32*)sysmem_newptr(sizeof(t_int32) * bank->reson_cnt);
   if (bank->sort_ampl == NULL) { MY_ERR("bank_new:  Failed to allocate sort_ampl."); return ERR_ALLOC; }
 
-  bank->sort_freq = (t_int32 *)sysmem_newptr(sizeof(t_int32) * bank->reson_cnt);
+  bank->sort_freq = (t_int32*)sysmem_newptr(sizeof(t_int32) * bank->reson_cnt);
   if (bank->sort_freq == NULL) { MY_ERR("bank_new:  Failed to allocate sort_freq."); return ERR_ALLOC; }
 
-  bank->sort_decay = (t_int32 *)sysmem_newptr(sizeof(t_int32) * bank->reson_cnt);
+  bank->sort_decay = (t_int32*)sysmem_newptr(sizeof(t_int32) * bank->reson_cnt);
   if (bank->sort_decay == NULL) { MY_ERR("bank_new:  Failed to allocate sort_decay."); return ERR_ALLOC; }
 
   // Sort the resonators by amplitude, frequency and decay
@@ -2057,17 +2146,19 @@ t_int32 bank_new(t_modal *x, t_bank *bank, t_int32 nb) {
 // ====  METHOD: BANK_REALLOC  ====
 // Reallocate all the arrays for a bank of resonators.
 
-t_int32 bank_realloc(t_modal *x, t_bank *bank, t_int32 nb) {
+t_int32 bank_realloc(t_modal* x, t_bank* bank, t_int32 nb) {
 
   TRACE("bank_realloc");
 
   // Check the validity of the number of resonators
   if (nb < 1) {
     MY_ERR("bank_realloc:  Invalid number of resonators: %i. Should be at least 1.", nb);
-    return ERR_ALLOC; }
+    return ERR_ALLOC;
+  }
   if (nb > x->reson_max) {
     MY_ERR("bank_realloc:  Invalid number of resonators: %i. Should be at most %i.", x->reson_max, nb);
-    return ERR_ALLOC; }
+    return ERR_ALLOC;
+  }
 
   // Variable initialization
   bank->is_on      = false;
@@ -2079,27 +2170,28 @@ t_int32 bank_realloc(t_modal *x, t_bank *bank, t_int32 nb) {
   bank->decay_mult = 1.0;
 
   // Memory allocation for new array of resonators
-  t_resonator *new_reson_arr =  (t_resonator *)sysmem_newptr(sizeof(t_resonator) * nb);
+  t_resonator* new_reson_arr =  (t_resonator*)sysmem_newptr(sizeof(t_resonator) * nb);
   if (new_reson_arr == NULL) { MY_ERR("bank_realloc:  Failed to allocate new_reson_arr."); return ERR_ALLOC; }
 
   // Copy the current resonators
   for (t_int32 res = 0; res < nb; res++) { reson_new(x, bank, new_reson_arr + res); }
   for (t_int32 res = 0; res < min(nb, bank->reson_cnt); res++){
-    reson_copy(x, bank, new_reson_arr + res, bank->reson_arr + res); }
-  
+    reson_copy(x, bank, new_reson_arr + res, bank->reson_arr + res);
+  }
+
   // Free the current array of resonators and set pointer to the new array
   if (bank->reson_arr) { sysmem_freeptr(bank->reson_arr); }
   bank->reson_arr = new_reson_arr;
   bank->reson_cnt = nb;
 
   // Memory reallocation for sorting
-  bank->sort_ampl   = (t_int32 *)sysmem_resizeptrclear(bank->sort_ampl, sizeof(t_int32) * bank->reson_cnt);
+  bank->sort_ampl   = (t_int32*)sysmem_resizeptrclear(bank->sort_ampl, sizeof(t_int32) * bank->reson_cnt);
   if (bank->sort_ampl == NULL) { MY_ERR("bank_realloc:  Failed to reallocate sort_ampl."); return ERR_ALLOC; }
 
-  bank->sort_freq = (t_int32 *)sysmem_resizeptrclear(bank->sort_freq, sizeof(t_int32)* bank->reson_cnt);
+  bank->sort_freq = (t_int32*)sysmem_resizeptrclear(bank->sort_freq, sizeof(t_int32)* bank->reson_cnt);
   if (bank->sort_freq == NULL) { MY_ERR("bank_realloc:  Failed to reallocate sort_freq."); return ERR_ALLOC; }
 
-  bank->sort_decay = (t_int32 *)sysmem_resizeptrclear(bank->sort_decay, sizeof(t_int32)* bank->reson_cnt);
+  bank->sort_decay = (t_int32*)sysmem_resizeptrclear(bank->sort_decay, sizeof(t_int32)* bank->reson_cnt);
   if (bank->sort_decay == NULL) { MY_ERR("bank_realloc:  Failed to reallocate sort_decay."); return ERR_ALLOC; }
 
   // Sort the resonators by amplitude, frequency and decay
@@ -2111,7 +2203,7 @@ t_int32 bank_realloc(t_modal *x, t_bank *bank, t_int32 nb) {
 // ====  METHOD: BANK_FREE  ====
 // Free all the arrays of a bank of resonators.
 
-void bank_free(t_modal *x, t_bank *bank) {
+void bank_free(t_modal* x, t_bank* bank) {
 
   TRACE("bank_free");
 
@@ -2124,7 +2216,7 @@ void bank_free(t_modal *x, t_bank *bank) {
 // ====  METHOD: COMPARE_AMPL  ====
 // Method used for sorting resonators by amplitude, used with qsort_s
 
-int compare_ampl(void *bank, const t_int32 *index1, const t_int32 *index2) {
+int compare_ampl(void* bank, const t_int32* index1, const t_int32* index2) {
 
   if ((((t_bank*)bank)->reson_arr + *index1)->a0 < (((t_bank*)bank)->reson_arr + *index2)->a0) { return 1; }
   else { return -1; }
@@ -2133,7 +2225,7 @@ int compare_ampl(void *bank, const t_int32 *index1, const t_int32 *index2) {
 // ====  METHOD: COMPARE_FREQ  ====
 // Method used for sorting resonators by frequency, used with qsort_s
 
-int compare_freq(void *bank, const t_int32 *index1, const t_int32 *index2) {
+int compare_freq(void* bank, const t_int32* index1, const t_int32* index2) {
 
   if ((((t_bank*)bank)->reson_arr + *index1)->freq > (((t_bank*)bank)->reson_arr + *index2)->freq) { return 1; }
   else { return -1; }
@@ -2142,7 +2234,7 @@ int compare_freq(void *bank, const t_int32 *index1, const t_int32 *index2) {
 // ====  METHOD: COMPARE_DECAY  ====
 // Method used for sorting resonators by decay, used with qsort_s
 
-int compare_decay(void *bank, const t_int32 *index1, const t_int32 *index2) {
+int compare_decay(void* bank, const t_int32* index1, const t_int32* index2) {
 
   if ((((t_bank*)bank)->reson_arr + *index1)->decay < (((t_bank*)bank)->reson_arr + *index2)->decay) { return 1; }
   else { return -1; }
@@ -2151,7 +2243,7 @@ int compare_decay(void *bank, const t_int32 *index1, const t_int32 *index2) {
 // ====  METHOD: BANK_SORT  ====
 // Sort the resonators by amplitude, frequency and decay
 
-void bank_sort(t_modal *x, t_bank *bank) {
+void bank_sort(t_modal* x, t_bank* bank) {
 
   TRACE("bank_sort");
 
@@ -2159,7 +2251,8 @@ void bank_sort(t_modal *x, t_bank *bank) {
   for (int i = 0; i < bank->reson_cnt; i++){
     bank->sort_ampl[i]  = i;
     bank->sort_freq[i]  = i;
-    bank->sort_decay[i]  = i; }
+    bank->sort_decay[i]  = i;
+  }
 
   // Sort the arrays of indexes for amplitude, frequency, and decay values
   qsort_s(bank->sort_ampl, bank->reson_cnt, sizeof(t_int32), compare_ampl, bank);
@@ -2186,7 +2279,7 @@ void bank_sort(t_modal *x, t_bank *bank) {
 // Used to update the parameters of the resonators.
 // Amplitude, frequency and decay have to be already defined.
 
-__inline void bank_update(t_modal *x, t_bank *bank) {
+__inline void bank_update(t_modal* x, t_bank* bank) {
 
   TRACE("bank_update");
 

@@ -5,7 +5,7 @@
 // Reorganizes the list by iterating forward and permutating once within the remaining sublist
 // Expects an array of m integers
 
-void random_n_of_m(t_int32 n, t_int32 m, t_int32 *index_arr) {
+void random_n_of_m(t_int32 n, t_int32 m, t_int32* index_arr) {
 
   // Initialize the array
   for (t_int32 i = 0; i < m; i++) { index_arr[i] = i; }
@@ -18,5 +18,6 @@ void random_n_of_m(t_int32 n, t_int32 m, t_int32 *index_arr) {
     j = rand() % (m - i);
     tmp = index_arr[i];
     index_arr[i] = index_arr[i + j];
-    index_arr[i + j] = tmp;  }
+    index_arr[i + j] = tmp;
+  }
 }

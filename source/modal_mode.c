@@ -2,19 +2,19 @@
 
 // ====  OPENING ACTIONS FOR MODES  ====
 
-void st_act_open_shift(t_modal *x, t_bank *bank, t_resonator *reson, t_mode *mode) {
+void st_act_open_shift(t_modal* x, t_bank* bank, t_resonator* reson, t_mode* mode) {
 
 //  reson->freq_tmp = reson->freq;
 }
 
-void st_act_diff(t_modal *x, t_bank *bank, t_resonator *reson, t_mode *mode) {
+void st_act_diff(t_modal* x, t_bank* bank, t_resonator* reson, t_mode* mode) {
 
   // If the diffusion has changed
   if ((reson->diff_chg) || (reson->diff_type == MODE_DIFF_ONE_RR) ||
     (reson->diff_type == MODE_DIFF_NUM_RR) || (reson->diff_type == MODE_DIFF_MATR)) {
 
     switch (reson->diff_type) {
-    case MODE_DIFF_ALL: 
+    case MODE_DIFF_ALL:
       for (t_int32 ch = 0; ch < 8; ch++) { reson->diff_mult[ch] = 1.0; };
       reson->diff_ind = 7;
       reson->diff_cnt = 8;
@@ -36,31 +36,34 @@ void st_act_diff(t_modal *x, t_bank *bank, t_resonator *reson, t_mode *mode) {
       reson->diff_mult[reson->diff_ind] = 1.0;
       reson->diff_cnt = 1;
       break;
-    
+
     // N channels chosen at random once or repeatedly
     case MODE_DIFF_NUM_R:
-    case MODE_DIFF_NUM_RR: 
+    case MODE_DIFF_NUM_RR:
     { reson->diff_cnt = reson->diff_sto;
       t_int32 index_arr[8] = { 0, 1, 2, 3, 4, 5, 6, 7 };
       random_n_of_m(reson->diff_cnt, 8, index_arr);
       for (t_int32 ch = 0; ch < reson->diff_cnt; ch++) { reson->diff_mult[index_arr[ch]] = 1.0; };
       for (t_int32 ch = reson->diff_cnt; ch < 8; ch++) { reson->diff_mult[index_arr[ch]] = 0.0; };
       t_int32 ch = 8;
-      while ((ch--) && (reson->diff_mult[ch] != 1.0)) { ; }
-      reson->diff_ind = ch; }
+      while ((ch--) && (reson->diff_mult[ch] != 1.0)) {; }
+      reson->diff_ind = ch;
+    }
       break;
-    
-    case MODE_DIFF_MATR: break;
-    case MODE_DIFF_FUNC: break;  }
 
-    reson->diff_chg = false; }
+    case MODE_DIFF_MATR: break;
+    case MODE_DIFF_FUNC: break;
+  }
+
+    reson->diff_chg = false;
+  }
 }
 
 // ====  METHOD:  MODE_NEW  ====
 
-void _mode_new(t_modal *x, t_bank *bank) {
+void _mode_new(t_modal* x, t_bank* bank) {
 
-  t_mode *modes = x->mode_arr;
+  t_mode* modes = x->mode_arr;
 
   // Default for all modes, overridden if necessary below
   for (t_int32 st = 0; st < MODE_LAST; st++) {
@@ -68,7 +71,8 @@ void _mode_new(t_modal *x, t_bank *bank) {
     modes[st].ampl_in    = 0.0;
     modes[st].ampl_out  = 1.0;
     modes[st].func_open  = NULL;
-    modes[st].func_close = NULL; }
+    modes[st].func_close = NULL;
+  }
 
   modes[MODE_FIX_CHG].name      = gensym("fix_chg");
   modes[MODE_FIX_CHG].type      = MODE_TYPE_VAR_A;
@@ -129,7 +133,7 @@ void _mode_new(t_modal *x, t_bank *bank) {
   modes[MODE_SHIFT1].func_open   = &st_act_open_shift;
   modes[MODE_SHIFT1].ampl_in    = 1.0;
   modes[MODE_SHIFT1].ampl_out    = 1.0;
-  
+
   modes[MODE_SHIFT2].name        = gensym("shift2");
   modes[MODE_SHIFT2].type        = MODE_TYPE_VAR_S;
   modes[MODE_SHIFT2].next_ind    = MODE_SHIFT3;
@@ -162,12 +166,12 @@ void _mode_new(t_modal *x, t_bank *bank) {
 
 // ====  METHOD: MODAL_MODE_ITERATE  ====
 
-void _mode_iterate(t_modal *x, t_bank *bank, t_resonator *reson) {
+void _mode_iterate(t_modal* x, t_bank* bank, t_resonator* reson) {
 
   //TRACE("mode_iterate");
 
   // Get the current mode
-  t_mode *mode = x->mode_arr + reson->mode_ind;
+  t_mode* mode = x->mode_arr + reson->mode_ind;
 
   // Closing actions for the mode
   if (mode->func_close) { mode->func_close(x, bank, reson, mode); }
@@ -179,10 +183,13 @@ void _mode_iterate(t_modal *x, t_bank *bank, t_resonator *reson) {
     case 0: mode = x->mode_arr + MODE_CYC_UP; break;
     case 1: mode = x->mode_arr + MODE_CYC_ON; break;
     case 2: mode = x->mode_arr + MODE_CYC_DOWN; break;
-    case 3: mode = x->mode_arr + MODE_CYC_OFF; break;  } }
+    case 3: mode = x->mode_arr + MODE_CYC_OFF; break;
+  }
+}
 
   else {
-    mode = x->mode_arr + mode->next_ind; }
+    mode = x->mode_arr + mode->next_ind;
+  }
 
   // Opening actions for the next mode
   //if (mode->func_open) { mode->func_open(x, bank, reson, mode); }
@@ -233,15 +240,15 @@ void _mode_iterate(t_modal *x, t_bank *bank, t_resonator *reson) {
 
 // ====  METHOD:  MODE_ALL_ON  ====
 
-void mode_all_on(t_modal *x, t_symbol *sym, t_int32 argc, t_atom *argv) {
+void mode_all_on(t_modal* x, t_symbol* sym, t_int32 argc, t_atom* argv) {
 
   TRACE("mode_all_on");
-  
+
   // The first argument should reference a bank of resonator
-  t_bank *bank = bank_find(x, argv, sym);
+  t_bank* bank = bank_find(x, argv, sym);
   if (bank == NULL) {  return; }
 
-  t_resonator *reson = NULL;
+  t_resonator* reson = NULL;
 
   // No time arguments: turn on resonators instantly
   if (argc == 1) {
@@ -250,8 +257,10 @@ void mode_all_on(t_modal *x, t_symbol *sym, t_int32 argc, t_atom *argv) {
 
       reson->mode_ind = MODE_FIX_OFF;
       reson->cntd      = 0;
-      reson->times[4] = (t_int32)(10 * x->msr); } }
-  
+      reson->times[4] = (t_int32)(10 * x->msr);
+    }
+  }
+
   // One time argument: same ramping time for everybody
   else if (argc == 2) {
     t_int32 ramp = (t_int32)(atom_getfloat(argv + 1) * x->msr);
@@ -261,7 +270,9 @@ void mode_all_on(t_modal *x, t_symbol *sym, t_int32 argc, t_atom *argv) {
 
       reson->mode_ind = MODE_FIX_OFF;
       reson->cntd      = 0;
-      reson->times[4] = ramp; } }
+      reson->times[4] = ramp;
+    }
+  }
 
   // Two time arguments: same ramping time, random delays
   else if (argc == 3) {
@@ -273,7 +284,9 @@ void mode_all_on(t_modal *x, t_symbol *sym, t_int32 argc, t_atom *argv) {
 
       reson->mode_ind = MODE_FIX_OFF;
       reson->cntd      = random_time_to_smp(0, wait_max, x->msr);
-      reson->times[4] = ramp; } }
+      reson->times[4] = ramp;
+    }
+  }
 
   // Three time arguments: random ramping times, random delays
   else if (argc == 4) {
@@ -288,20 +301,22 @@ void mode_all_on(t_modal *x, t_symbol *sym, t_int32 argc, t_atom *argv) {
       reson->mode_ind = MODE_FIX_OFF;
       ramp_f          = random_float(ramp_min, ramp_max);
       reson->cntd      = random_time_to_smp(0, wait_max - ramp_f, x->msr);
-      reson->times[4] = (t_int32)(ramp_f * x->msr); } }
+      reson->times[4] = (t_int32)(ramp_f * x->msr);
+    }
+  }
 }
 
 // ====  METHOD: MODAL_ALL_OFF  ====
 
-void mode_all_off(t_modal *x, t_symbol *sym, t_int32 argc, t_atom *argv) {
+void mode_all_off(t_modal* x, t_symbol* sym, t_int32 argc, t_atom* argv) {
 
   TRACE("mode_all_off");
-  
+
   // The first argument should reference a bank of resonator
-  t_bank *bank = bank_find(x, argv, sym);
+  t_bank* bank = bank_find(x, argv, sym);
   if (bank == NULL) { return; }
 
-  t_resonator *reson = NULL;
+  t_resonator* reson = NULL;
 
   // No time arguments: turn on resonators instantly
   if (argc == 1) {
@@ -310,8 +325,10 @@ void mode_all_off(t_modal *x, t_symbol *sym, t_int32 argc, t_atom *argv) {
 
       reson->mode_ind = MODE_FIX_ON;
       reson->cntd       = 0;
-      reson->times[4] = (t_int32)(10 * x->msr); } }
-  
+      reson->times[4] = (t_int32)(10 * x->msr);
+    }
+  }
+
   // One time argument: same ramping time for everybody
   else if (argc == 2) {
     t_int32 ramp = (t_int32)(atom_getfloat(argv + 1) * x->msr);
@@ -321,19 +338,23 @@ void mode_all_off(t_modal *x, t_symbol *sym, t_int32 argc, t_atom *argv) {
 
       reson->mode_ind = MODE_FIX_ON;
       reson->cntd       = 0;
-      reson->times[4] = ramp; } }
+      reson->times[4] = ramp;
+    }
+  }
 
   // Two time arguments: same ramping time, random delays
   else if (argc == 3) {
     t_int32 ramp = (t_int32)(atom_getfloat(argv + 1) * x->msr);
     t_double wait_max = atom_getfloat(argv + 2) - atom_getfloat(argv + 1);
-    
+
     for (int res = 0; res < bank->reson_cnt; res++) {
       reson = bank->reson_arr + res;
 
       reson->mode_ind = MODE_FIX_ON;
       reson->cntd       = random_time_to_smp(0, wait_max, x->msr);
-      reson->times[4] = ramp; } }
+      reson->times[4] = ramp;
+    }
+  }
 
   // Three time arguments: random ramping times, random delays
   else if (argc == 4) {
@@ -348,12 +369,14 @@ void mode_all_off(t_modal *x, t_symbol *sym, t_int32 argc, t_atom *argv) {
       reson->mode_ind = MODE_FIX_ON;
       ramp_f           = random_float(ramp_min, ramp_max);
       reson->cntd       = random_time_to_smp(0, wait_max - ramp_f, x->msr);
-      reson->times[4] = (t_int32)(ramp_f * x->msr); } }
+      reson->times[4] = (t_int32)(ramp_f * x->msr);
+    }
+  }
 }
 
 // ====  METHOD: MODE_CYCLE  ====
 
-void mode_cycle(t_modal *x, t_symbol *sym, t_int32 argc, t_atom *argv) {
+void mode_cycle(t_modal* x, t_symbol* sym, t_int32 argc, t_atom* argv) {
 
   TRACE("mode_cycle");
 
@@ -361,7 +384,7 @@ void mode_cycle(t_modal *x, t_symbol *sym, t_int32 argc, t_atom *argv) {
   if (argc < 3) { MY_ERR("%s:  Invalid arguments:  At least 3 expected.", sym->s_name); return; }
 
   // The first argument should reference a bank of resonator
-  t_bank *bank = bank_find(x, argv, sym);
+  t_bank* bank = bank_find(x, argv, sym);
   if (bank == NULL) { MY_ERR("%s:  Invalid arguments:  Arg 0: bank not found.", sym->s_name); return; }
 
   // ==== Applying command to ALL resonators
@@ -371,15 +394,15 @@ void mode_cycle(t_modal *x, t_symbol *sym, t_int32 argc, t_atom *argv) {
   if ((atom_gettype(argv + 1) == A_SYM) && (atom_getsym(argv + 1) == gensym("all"))) {
 
     // The third argument should be a symbol indicating the command for the bank
-    t_symbol *cmd = atom_getsym(argv + 2);
+    t_symbol* cmd = atom_getsym(argv + 2);
 
     // "resume": set all the resonators back to cycling
     if (cmd == gensym("resume")) {
-      
+
       // Loop through the resonators
       for (t_int32 res = 0; res < bank->reson_cnt; res++) {
 
-        t_resonator *reson = bank->reson_arr + res;
+        t_resonator* reson = bank->reson_arr + res;
 
         // Only cycle resonators that are not cycling yet
         if ((reson->mode_ind != MODE_CYC_UP) && (reson->mode_ind != MODE_CYC_ON) &&
@@ -388,62 +411,82 @@ void mode_cycle(t_modal *x, t_symbol *sym, t_int32 argc, t_atom *argv) {
           // Calculate the total cycle time for waiting
           t_int32 time = 0;
           if (reson->cntd_type == MODE_CNTD_BANK) {
-            for (t_int32 t = 0; t < 4; t++) {  time += bank->times[2 * t + 1]; } }
+            for (t_int32 t = 0; t < 4; t++) {  time += bank->times[2 * t + 1]; }
+          }
           else if (reson->cntd_type == MODE_CNTD_RESON) {
-            for (t_int32 t = 0; t < 4; t++) {  time += reson->times[t]; } }
+            for (t_int32 t = 0; t < 4; t++) {  time += reson->times[t]; }
+          }
 
           // Set mode to wait up to the total cycle length
           reson->mode_ind = MODE_CYC_WAIT;
           if (reson->mode_type != MODE_TYPE_OFF) { reson->mode_type = MODE_TYPE_FIX; }
-          reson->cntd = random_int(0, time); } } }
-    
+          reson->cntd = random_int(0, time);
+        }
+      }
+    }
+
     // "reson": set resonator time parameters in control
     else if(cmd == gensym("reson")) {
       for (t_int32 res = 0; res < bank->reson_cnt; res++) {
-        (bank->reson_arr + res)->cntd_type = MODE_CNTD_RESON; }  }
+        (bank->reson_arr + res)->cntd_type = MODE_CNTD_RESON;
+      }
+    }
 
     // "rand": randomize resonator time parameters once, and set them in control
     else if(cmd == gensym("rand")) {
       for (t_int32 res = 0; res < bank->reson_cnt; res++) {
         (bank->reson_arr + res)->cntd_type = MODE_CNTD_RESON;
         for (t_int32 t = 0; t < 4; t++){
-          (bank->reson_arr + res)->times[t] = random_int(bank->times[2 * t], bank->times[2 * t + 1]); } } }
+          (bank->reson_arr + res)->times[t] = random_int(bank->times[2 * t], bank->times[2 * t + 1]);
+        }
+      }
+    }
 
     // "randr": set bank time parameters in control, so time is randomized repeatedly
     else if (cmd == gensym("randr")) {
       for (t_int32 res = 0; res < bank->reson_cnt; res++) {
-        (bank->reson_arr + res)->cntd_type = MODE_CNTD_BANK; } }
+        (bank->reson_arr + res)->cntd_type = MODE_CNTD_BANK;
+      }
+    }
 
     // "times": change time parameters, in the bank if 8 floats, in the resonators if 4 floats
     else if(cmd == gensym("times")) {
       if (argc == 7) {
         for (t_int32 res = 0; res < bank->reson_cnt; res++) {
           for (t_int32 t = 0; t < 4; t++) {
-            (bank->reson_arr + res)->times[t] = (t_int32)(atom_getfloat(argv + t + 3) * x->msr); } } }
+            (bank->reson_arr + res)->times[t] = (t_int32)(atom_getfloat(argv + t + 3) * x->msr);
+          }
+        }
+      }
       else if (argc == 11) {
         for (t_int32 t = 0; t < 8; t++) {
-          bank->times[t] = (t_int32)(atom_getfloat(argv + t + 3) * x->msr); } }
+          bank->times[t] = (t_int32)(atom_getfloat(argv + t + 3) * x->msr);
+        }
+      }
       else{
           MY_ERR("%s:  Invalid arguments for command \"%s\":  Either 4 or 8 floats expected.",
-            sym->s_name, cmd->s_name); return; }  }
+            sym->s_name, cmd->s_name); return;
+          }
+        }
 
     // Otherwise the command is invalid
-    else { MY_ERR("%s:  Invalid command.", sym->s_name); return; } }
+    else { MY_ERR("%s:  Invalid command.", sym->s_name); return; }
+  }
 
   // ==== Applying command to ONE resonator
 
   // Or The second argument can be a resonator reference
   else {
-    t_resonator *reson = modal_find_reson(x, bank, argv + 1, sym);
+    t_resonator* reson = modal_find_reson(x, bank, argv + 1, sym);
     if (reson == NULL) { MY_ERR("%s:  Invalid arguments:  Arg 1: resonator not found.", sym->s_name); return; }
 
     // The third argument should be a symbol indicating the command for the bank
-    t_symbol *cmd = atom_getsym(argv + 2);
+    t_symbol* cmd = atom_getsym(argv + 2);
 
     // "resume": set all the resonators back to cycling
     if (cmd == gensym("resume")) {
-      
-      t_mode *mode = x->mode_arr + reson->mode_ind;
+
+      t_mode* mode = x->mode_arr + reson->mode_ind;
 
       // Only cycle resonators that are not cycling yet
       if ((reson->mode_ind != MODE_CYC_UP) && (reson->mode_ind != MODE_CYC_ON) &&
@@ -453,50 +496,63 @@ void mode_cycle(t_modal *x, t_symbol *sym, t_int32 argc, t_atom *argv) {
 
         // Calculate the total cycle time for waiting
         if (reson->cntd_type == MODE_CNTD_BANK) {
-          for (t_int32 t = 0; t < 4; t++) {  time += bank->times[2 * t + 1]; } }
+          for (t_int32 t = 0; t < 4; t++) {  time += bank->times[2 * t + 1]; }
+        }
         else if (reson->cntd_type == MODE_CNTD_RESON) {
-          for (t_int32 t = 0; t < 4; t++) {  time += reson->times[t]; } }
+          for (t_int32 t = 0; t < 4; t++) {  time += reson->times[t]; }
+        }
 
         // Set mode to wait up to the total cycle length
         reson->mode_ind = MODE_CYC_WAIT;
         if (reson->mode_type != MODE_TYPE_OFF) { reson->mode_type = MODE_TYPE_FIX; }
-        reson->cntd = random_int(0, time); } }
-    
+        reson->cntd = random_int(0, time);
+      }
+    }
+
     // "reson": set resonator time parameters in control
     else if(cmd == gensym("reson")) {
-      reson->cntd_type = MODE_CNTD_RESON; }
+      reson->cntd_type = MODE_CNTD_RESON;
+    }
 
     // "rand": randomize resonator time parameters once, and set them in control
     else if(cmd == gensym("rand")) {
       reson->cntd_type = MODE_CNTD_RESON;
       for (t_int32 t = 0; t < 4; t++){
-        reson->times[t] = random_int(bank->times[2 * t], bank->times[2 * t + 1]); } }
+        reson->times[t] = random_int(bank->times[2 * t], bank->times[2 * t + 1]);
+      }
+    }
 
     // "randr": set bank time parameters in control, so time is randomized repeatedly
     else if (cmd == gensym("randr")) {
-      reson->cntd_type = MODE_CNTD_BANK; }
+      reson->cntd_type = MODE_CNTD_BANK;
+    }
 
     // "times": change time parameters, in the bank if 8 floats, in the resonators if 4 floats
     else if(cmd == gensym("times")) {
       if (argc == 7) {
         for (t_int32 t = 0; t < 4; t++) {
-          reson->times[t] = (t_int32)(atom_getfloat(argv + t + 3) * x->msr); } }
+          reson->times[t] = (t_int32)(atom_getfloat(argv + t + 3) * x->msr);
+        }
+      }
       else{
           MY_ERR("%s:  Invalid arguments for command \"%s\":  4 floats expected.",
-            sym->s_name, cmd->s_name); return; }  }
+            sym->s_name, cmd->s_name); return;
+          }
+        }
 
     // Otherwise the command is invalid
-    else { MY_ERR("%s:  Invalid command.", sym->s_name); return; } }
+    else { MY_ERR("%s:  Invalid command.", sym->s_name); return; }
+  }
 }
 
 // ====  METHOD: MODE_DIFFUSION  ====
 
-void mode_diffusion(t_modal *x, t_symbol *sym, t_int32 argc, t_atom *argv) {
+void mode_diffusion(t_modal* x, t_symbol* sym, t_int32 argc, t_atom* argv) {
 
   TRACE("mode_diffusion");
 
   // The first argument should reference a bank of resonator
-  t_bank *bank = bank_find(x, argv, sym);
+  t_bank* bank = bank_find(x, argv, sym);
   if (bank == NULL) { MY_ERR("%s:  Invalid arguments:  Arg 0: bank not found.", sym->s_name); return; }
 
   // ==== Applying command to ALL resonators
@@ -504,10 +560,10 @@ void mode_diffusion(t_modal *x, t_symbol *sym, t_int32 argc, t_atom *argv) {
   // The second argument can be the symbol "all"
   // The command then applies to all the resonators of the bank
   if ((atom_gettype(argv + 1) == A_SYM) && (atom_getsym(argv + 1) == gensym("all"))) {
-    t_resonator *reson = NULL;
+    t_resonator* reson = NULL;
 
     // The third argument should be a symbol indicating the command for the resonator
-    t_symbol *cmd = atom_getsym(argv + 2);
+    t_symbol* cmd = atom_getsym(argv + 2);
 
     // Consider the possible commands
 
@@ -524,15 +580,18 @@ void mode_diffusion(t_modal *x, t_symbol *sym, t_int32 argc, t_atom *argv) {
           reson->diff_ind = ch;
           reson->diff_cnt = 1;
           for (t_int32 ch2 = 0; ch2 < 8; ch2++) { reson->diff_mult[ch2] = 0; }
-          reson->diff_mult[reson->diff_ind] = 1; } }
-  
-      else { MY_ERR("%s:  Invalid arguments for \"%s\" command.", sym->s_name, cmd->s_name); return; } }
+          reson->diff_mult[reson->diff_ind] = 1;
+        }
+      }
+
+      else { MY_ERR("%s:  Invalid arguments for \"%s\" command.", sym->s_name, cmd->s_name); return; }
+    }
 
     // == Output to one set channel
     if (cmd == gensym("1to1")) {
 
       for (t_int32 bk = 0; bk < 8; bk++) {
-        t_bank *bank2 = x->bank_arr + bk;
+        t_bank* bank2 = x->bank_arr + bk;
 
         for (t_int32 res = 0; res < bank2->reson_cnt; res++) {
           reson = bank2->reson_arr + res;
@@ -541,14 +600,19 @@ void mode_diffusion(t_modal *x, t_symbol *sym, t_int32 argc, t_atom *argv) {
           reson->diff_ind = bk;
           reson->diff_cnt = 1;
           for (t_int32 ch2 = 0; ch2 < 8; ch2++) { reson->diff_mult[ch2] = 0; }
-          reson->diff_mult[reson->diff_ind] = 1; } } }
+          reson->diff_mult[reson->diff_ind] = 1;
+        }
+      }
+    }
 
     // == Output to all channels
     else if (cmd == gensym("all")) {
       for (t_int32 res = 0; res < bank->reson_cnt; res++) {
         reson = bank->reson_arr + res;
         reson->diff_type = MODE_DIFF_ALL;
-        reson->diff_chg  = true; } }
+        reson->diff_chg  = true;
+      }
+    }
 
     // == Output to one set channel
     else if (cmd == gensym("set")) {
@@ -561,9 +625,12 @@ void mode_diffusion(t_modal *x, t_symbol *sym, t_int32 argc, t_atom *argv) {
           reson = bank->reson_arr + res;
           reson->diff_type = MODE_DIFF_ONE_S;
           reson->diff_sto  = ch;
-          reson->diff_chg  = true; } }
-  
-      else { MY_ERR("%s:  Invalid arguments for \"%s\" command.", sym->s_name, cmd->s_name); return; } }
+          reson->diff_chg  = true;
+        }
+      }
+
+      else { MY_ERR("%s:  Invalid arguments for \"%s\" command.", sym->s_name, cmd->s_name); return; }
+    }
 
     // == Output to 1 or N channels chosen at random once or repeatedly
     else if ((cmd == gensym("rand")) || (cmd == gensym("randr"))) {
@@ -576,34 +643,41 @@ void mode_diffusion(t_modal *x, t_symbol *sym, t_int32 argc, t_atom *argv) {
 
           if (nb == 1) {
             if (cmd == gensym("rand"))  { reson->diff_type = MODE_DIFF_ONE_R; }
-            if (cmd == gensym("randr")) { reson->diff_type = MODE_DIFF_ONE_RR; } }
+            if (cmd == gensym("randr")) { reson->diff_type = MODE_DIFF_ONE_RR; }
+          }
           else {
             if (cmd == gensym("rand"))  { reson->diff_type = MODE_DIFF_NUM_R; }
-            if (cmd == gensym("randr")) { reson->diff_type = MODE_DIFF_NUM_RR; } }
+            if (cmd == gensym("randr")) { reson->diff_type = MODE_DIFF_NUM_RR; }
+          }
 
           reson->diff_sto = nb;
-          reson->diff_chg = true; } }
+          reson->diff_chg = true;
+        }
+      }
 
-      else { MY_ERR("%s:  Invalid arguments for \"%s\" command.", sym->s_name, cmd->s_name); return; } }
+      else { MY_ERR("%s:  Invalid arguments for \"%s\" command.", sym->s_name, cmd->s_name); return; }
+    }
 
-    else { MY_ERR("%s:  Invalid command.", sym->s_name); return; } }
+    else { MY_ERR("%s:  Invalid command.", sym->s_name); return; }
+  }
 
   // ==== Applying command to ONE resonator
 
   // Or The second argument can be a resonator reference
   else {
-    t_resonator *reson = modal_find_reson(x, bank, argv + 1, sym);
+    t_resonator* reson = modal_find_reson(x, bank, argv + 1, sym);
     if (reson == NULL) { MY_ERR("%s:  Invalid arguments:  Arg 1: resonator not found.", sym->s_name); return; }
 
     // The third argument should be a symbol indicating the command for the resonator
-    t_symbol *cmd = atom_getsym(argv + 2);
+    t_symbol* cmd = atom_getsym(argv + 2);
 
     // Consider the possible commands
 
     // == Output to all channels
     if (cmd == gensym("all")) {
       reson->diff_type = MODE_DIFF_ALL;
-      reson->diff_chg  = true; }
+      reson->diff_chg  = true;
+    }
 
     // == Output to one set channel
     else if (cmd == gensym("set")) {
@@ -613,9 +687,11 @@ void mode_diffusion(t_modal *x, t_symbol *sym, t_int32 argc, t_atom *argv) {
           && ((ch = (t_int32)atom_getlong(argv + 3)) >= 0) && (ch <= 7)) {
         reson->diff_type = MODE_DIFF_ONE_S;
         reson->diff_sto  = ch;
-        reson->diff_chg  = true; }
-  
-      else { MY_ERR("%s:  Invalid arguments for \"%s\" command.", sym->s_name, cmd->s_name); return; } }
+        reson->diff_chg  = true;
+      }
+
+      else { MY_ERR("%s:  Invalid arguments for \"%s\" command.", sym->s_name, cmd->s_name); return; }
+    }
 
     // == Output to 1 or N channels chosen at random once or repeatedly
     else if ((cmd == gensym("rand")) || (cmd == gensym("randr"))) {
@@ -626,15 +702,19 @@ void mode_diffusion(t_modal *x, t_symbol *sym, t_int32 argc, t_atom *argv) {
 
         if (nb == 1) {
           if (cmd == gensym("rand"))  { reson->diff_type = MODE_DIFF_ONE_R; }
-          if (cmd == gensym("randr")) { reson->diff_type = MODE_DIFF_ONE_RR; } }
+          if (cmd == gensym("randr")) { reson->diff_type = MODE_DIFF_ONE_RR; }
+        }
         else {
           if (cmd == gensym("rand"))  { reson->diff_type = MODE_DIFF_NUM_R; }
-          if (cmd == gensym("randr")) { reson->diff_type = MODE_DIFF_NUM_RR; } }
+          if (cmd == gensym("randr")) { reson->diff_type = MODE_DIFF_NUM_RR; }
+        }
 
         reson->diff_sto = nb;
-        reson->diff_chg = true; }
+        reson->diff_chg = true;
+      }
 
-      else { MY_ERR("%s:  Invalid arguments for \"%s\" command.", sym->s_name, cmd->s_name); return; } }
+      else { MY_ERR("%s:  Invalid arguments for \"%s\" command.", sym->s_name, cmd->s_name); return; }
+    }
 
     else { MY_ERR("%s:  Invalid command.", sym->s_name); return; }
   }
@@ -642,26 +722,27 @@ void mode_diffusion(t_modal *x, t_symbol *sym, t_int32 argc, t_atom *argv) {
 
 // ====  METHOD: MODE_RESONATOR  ====
 
-void mode_resonator(t_modal *x, t_symbol *sym, t_int32 argc, t_atom *argv) {
+void mode_resonator(t_modal* x, t_symbol* sym, t_int32 argc, t_atom* argv) {
 
   TRACE("mode_resonator");
 
   // The first argument should reference a bank of resonator
-  t_bank *bank = bank_find(x, argv, sym);
+  t_bank* bank = bank_find(x, argv, sym);
   if (bank == NULL) { return; }
 
   // The second argument should reference a resonator
-  t_resonator *reson = modal_find_reson(x, bank, argv + 1, sym);
+  t_resonator* reson = modal_find_reson(x, bank, argv + 1, sym);
   if (reson == NULL) { return; }
 
   // The third argument should be a symbol indicating the command for the resonator
-  t_symbol *cmd = atom_getsym(argv + 2);
+  t_symbol* cmd = atom_getsym(argv + 2);
 
   // The fourth optional argument is a ramping time
   t_int32 ramp = 0;
   if (argc == 3) { ramp = (t_int32)(10 * x->msr); }
   else if ((argc >= 4) && ((atom_gettype(argv + 3) == A_LONG) || (atom_gettype(argv + 3) == A_FLOAT))) {
-    ramp = (t_int32)(atom_getfloat(argv + 3) * x->msr); }
+    ramp = (t_int32)(atom_getfloat(argv + 3) * x->msr);
+  }
   else { MY_ERR("%s:  Invalid arguments.", sym->s_name); return; }
 
   // Consider the possible commands
@@ -670,13 +751,15 @@ void mode_resonator(t_modal *x, t_symbol *sym, t_int32 argc, t_atom *argv) {
   if (cmd == gensym("on")) {
     reson->mode_ind          = MODE_FIX_OFF;
     reson->cntd                = 0;
-    reson->times[4] = ramp;  }
+    reson->times[4] = ramp;
+  }
 
   // == Turn the resonator off
   else if (cmd == gensym("off")) {
     reson->mode_ind          = MODE_FIX_ON;
     reson->cntd                = 0;
-    reson->times[4] = ramp;  }
+    reson->times[4] = ramp;
+  }
 
   // == Toggle the resonator on or off
   else if (cmd == gensym("toggle")) {
@@ -691,13 +774,15 @@ void mode_resonator(t_modal *x, t_symbol *sym, t_int32 argc, t_atom *argv) {
       reson->mode_ind = MODE_FIX_OFF;
       reson->cntd = 0;
       reson->times[4] = ramp;
-      break; }
+      break;
+    }
 
-    reson->cntd = 0; }
+    reson->cntd = 0;
+  }
 
   // == Set the resonator back to cycle if it is fixed
   else if (cmd == gensym("cycle")) {
-    
+
     switch (rand() % 4) {
 
     case 0:
@@ -718,11 +803,14 @@ void mode_resonator(t_modal *x, t_symbol *sym, t_int32 argc, t_atom *argv) {
     case 3:
       reson->mode_ind = MODE_CYC_DOWN;
       reson->cntd = 0;
-      break; } }
+      break;
+    }
+  }
 
   // == Output rms for a given resonator and bank
   else if (cmd == gensym("rms")) {
-    x->output_ind = (t_int32)(reson - bank->reson_arr);  }
+    x->output_ind = (t_int32)(reson - bank->reson_arr);
+  }
 
   // == Start a pitch shift cycle
   /* XXX else if (cmd == gensym("shift")) {
@@ -735,10 +823,11 @@ void mode_resonator(t_modal *x, t_symbol *sym, t_int32 argc, t_atom *argv) {
     reson->cntd = (t_int32)(500 * x->msr);
     reson->out_A_targ = 2;
     reson->param[0] = shift;
-    reson->times[(x->mode_arr + MODE_SHIFT2)->time_ind] = ramp; }*/
+    reson->times[(x->mode_arr + MODE_SHIFT2)->time_ind] = ramp;
+  } */
 
   x->reson_cur = reson;
-  
+
   // Send out a message to indicate resonator information
   t_atom mess_arr[4];
   atom_setlong(mess_arr, atom_getlong(argv + 1));
