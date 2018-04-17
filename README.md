@@ -67,14 +67,34 @@ Up to three arguments can be provided, in the following order. Default values ar
 
 ### Messages
 
+Banks can be identified by an index between 0 and the maximum number of banks, a name given as a symbol, or using the `"free"` symbol when creating a bank, to pick the first available empty bank. In the following, `bank id` can thus be `(int | sym | "free")`.
+
 #### Load, save and manipulate modal bank models
 
-- dictionary <dictionary name>
-- import
-- load
-- save
-- split
-- join
+- `dictionary <dictionary (sym)>`
+
+Set the dictionary used by the external to store data.
+
+- `import <bank to import into (int | sym | "free")> <new bank name (sym)> *<file name (sym)>*`
+
+Create a bank from importing a text file containing: the number of resonators, and three values for each resonator, amplitude, frequency, decay. If the optional file name is not provided in the message, a dialog box opens to choose a file.
+
+- `load <bank name in dict (sym)> <bank to load into (int | sym)>`
+
+Load a bank from the dictionary.
+
+- `save <bank to save (int | sym)> <bank name for dict (sym)>`
+
+Save a bank into the dictionary.
+
+- `split <bank to split (int | sym)> <bank name for dict (sym)>`
+
+Split a bank and save it in the dictionary. The split is determined by keeping all the resonators that are not set to off. The remaining resonators are saved in second bank named with the suffix `_rem`
+
+- `join <bank to join (int | sym)> <bank to join (int | sym)>`
+
+Join two banks.
+
 - rename
 - delete
 - clear
